@@ -1,0 +1,376 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>HitO</title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css"
+          integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap-theme.min.css"
+          integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"
+            integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+            crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/css/question.css">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="app">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">HitO</span>
+                </button>
+                <a class="navbar-brand" href="#" @click="toIndex">HitO</a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li th:if="${session.user!=null}">
+                        <a href="/pages/publish.html">发布</a>
+                    </li>
+                    <li class="dropdown" v-if="name">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">{{name}}<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" @click="toProfile">我的问题</a></li>
+                            <li><a href="#">个人资料</a></li>
+                            <li><a href="#" @click="logOut">退出登录</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid main">
+        <div class="row">
+            <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                <h2><span class="glyphicon glyphicon-list" aria-hidden="true">{{questionDto.title}}</span></h2>
+                <hr>
+                <div class="media">
+                    <span class="question-description">{{questionDto.description}}</span><br><br><br><br>
+                    <span class="text-desc">{{questionDto.commentCount}} 个回复 • {{questionDto.viewCount}} 次浏览 • {{questionDto.likeCount}} 个赞 • {{questionUserName}}发布于{{questionDto.createTime}}</span>
+                    <span class="glyphicon glyphicon-thumbs-up text-desc" aria-hidden="true" v-if="showLike"
+                          @click="addLike"></span>
+                    <span class="glyphicon glyphicon-thumbs-up text-desc" aria-hidden="true" style="color: orange"
+                          v-if="!showLike" @click="subLike"></span>
+                    <a class="text-desc" v-if="questionDto.creator === username" href="javascript:void(0);"
+                       @click.prevent="deleteQuestion(item.id)"> 删除</a>
+                </div>
+                <br>
+                <div class="media-body">
+                    <div class="comment-section">
+                        <textarea class="form-control" rows="3" v-model="newComment"
+                                  placeholder="输入你的评论..."></textarea>
+                        <button class="btn btn-primary" @click="submitComment" style="float: right">发表评论</button>
+                    </div>
+                    <div class="media" v-for="(item,index) in commentDtoList" :key="index">
+                        <div class="media-left">
+                            <a href="#">
+                                <img class="media-object" :src=item.user.avatarUrl>
+                            </a>
+                        </div>
+                        <div class="media-body">
+                            <span class="clickable">{{item.content}}</span><br>
+                            <span class="text-desc">{{item.likeCount}} 个赞 • {{item.user.name}}发布于{{item.createTime}}</span>
+                            <span class="glyphicon glyphicon-thumbs-up text-desc" aria-hidden="true"
+                                  v-if="showCommentLike[index]"
+                                  @click="addCommentLike(index)"></span>
+                            <span class="glyphicon glyphicon-thumbs-up text-desc" aria-hidden="true"
+                                  style="color: orange"
+                                  v-if="!showCommentLike[index]" @click="subCommentLike(index)"></span>
+                            <a class="text-desc" v-if="item.creator === username" href="javascript:void(0);"
+                               @click.prevent="deleteComment(item.id)"> 删除</a>
+                        </div>
+                    </div>
+                    <el-pagination
+                            @size-change="handleSizeChange"
+                            @current-change="handleCurrentChange"
+                            :current-page="currentPageNumber"
+                            :page-sizes="[10,20,30,40,50]"
+                            :page-size="10"
+                            layout="total, sizes, prev, pager, next, jumper"
+                            :total=this.total>
+                    </el-pagination>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+                <h3>热门话题</h3>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            name: '',
+            username: '',
+            qid: '',
+            questionDto: {},
+            questionUserName: '',
+            showLike: true,
+            newComment: '',
+            commentDtoList: [],
+            currentPageNumber: 1,
+            size: 10,
+            total: 0,
+            showCommentLike: []
+        },
+        created: function () {
+            this.getNameBySession();
+            this.qid = sessionStorage.getItem("qid");
+            this.getQuestionById(this.qid);
+            this.getUsernameBySession().then(() => {
+                if (sessionStorage.getItem(JSON.stringify({
+                    username: this.username,
+                    qid: this.qid
+                })) == '1') {
+                    this.showLike = false;
+                } else {
+                    this.showLike = true;
+                }
+            })
+            this.getCommentNumber(this.qid);
+            this.getCommentList(this.qid, this.currentPageNumber, this.size).then(()=>{
+                this.initializeCommentLikeStates();
+            })
+        },
+        methods: {
+            async getNameBySession() {
+                try {
+                    const resp = await axios.get('/user/get/name'
+                    );
+                    if (resp.data.code == 1) {
+                        this.name = resp.data.data;
+                    } else {
+                        window.location.href = "login.html";
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async logOut() {
+                try {
+                    const resp = await axios.get('/user/logout');
+                    if (resp.data.code == 1) {
+                        window.location.href = "login.html"
+                    } else {
+                        console.log(resp.msg);
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            toIndex() {
+                window.location.href = "index.html";
+            },
+            async getUsernameBySession() {
+                try {
+                    const resp = await axios.get('/user/get/username'
+                    );
+                    if (resp.data.code == 1) {
+                        this.username = resp.data.data;
+                    } else {
+                        window.location.href = "login.html";
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async deleteQuestion(id) {
+                try {
+                    const resp = await axios.delete('/user/delete', {
+                        params: {
+                            id: id
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        alert(resp.data.data);
+                        this.getQuestionList(this.currentPageNumber, this.size);
+                    } else {
+                        console.log(resp.data.msg);
+                    }
+                } catch (error) {
+                    console.error('删除失败', error);
+                }
+            },
+            toProfile() {
+                window.location.href = "profile.html";
+            },
+            async getQuestionById(id) {
+                try {
+                    const resp = await axios.get('/user/questionbyid', {
+                        params: {
+                            id: id
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        this.questionDto = resp.data.data;
+                        this.questionUserName = this.questionDto.user.name;
+                    } else {
+                        console.log(resp.data.data)
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async changeLike(id, likeCount) {
+                let likeChangeInfo = {
+                    id: this.qid,
+                    likeCount: likeCount
+                };
+                try {
+                    const resp = await axios.put('/user/like', JSON.stringify(likeChangeInfo), {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (resp.data.code == 1) {
+
+                    } else {
+
+                    }
+                } catch (error) {
+                    console.error('修改失败', error);
+                }
+            },
+            addLike() {
+                this.changeLike(this.qid, this.questionDto.likeCount + 1);
+                sessionStorage.setItem(JSON.stringify({
+                    username: this.username,
+                    qid: this.qid
+                }), '1');
+                this.showLike = false;
+                location.href = "question.html";
+            },
+            subLike() {
+                this.changeLike(this.qid, this.questionDto.likeCount - 1);
+                sessionStorage.setItem(JSON.stringify({
+                    username: this.username,
+                    qid: this.qid
+                }), '0');
+                this.showLike = true;
+                location.href = "question.html";
+            },
+            async submitComment() {
+                let comment = {
+                    content: this.newComment,
+                    creator: this.username,
+                    ascription: this.qid
+                };
+                try {
+                    const resp = await axios.post('/user/comment', JSON.stringify(comment), {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        alert("评论成功");
+                        window.location.href = "question.html";
+                    } else {
+                        console.log(resp.data.msg);
+                    }
+                } catch (error) {
+                    console.error('评论失败', error);
+                }
+            },
+            async getCommentList(id, pageNumber, pageSize) {
+                try {
+                    const resp = await axios.get('/user/commentlist', {
+                        params: {
+                            ascription: id,
+                            pageNumber: pageNumber,
+                            pageSize: pageSize
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        this.commentDtoList = resp.data.data;
+                    } else {
+                        console.log(resp.data.data)
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async getCommentNumber(id) {
+                try {
+                    const resp = await axios.get('/user/commentnumber', {
+                        params: {
+                            ascription: id
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        this.total = resp.data.data;
+                    } else {
+                        console.log(resp.data.data)
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            handleSizeChange(newSize) {
+                this.size = newSize;
+                this.getCommentList(this.qid, this.currentPageNumber, this.size);
+            },
+            handleCurrentChange(newPage) {
+                this.currentPageNumber = newPage;
+                this.getCommentList(this.qid, this.currentPageNumber, this.size);
+            },
+            async changeCommentLike(id, likeCommentCount) {
+                let likeChangeInfo = {
+                    id: id,
+                    likeCount: likeCommentCount
+                };
+                try {
+                    const resp = await axios.put('/user/commentlike', JSON.stringify(likeChangeInfo), {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (resp.data.code == 1) {
+
+                    } else {
+
+                    }
+                } catch (error) {
+                    console.error('修改失败', error);
+                }
+            },
+            addCommentLike(index) {
+                this.changeCommentLike(this.commentDtoList[index].id, this.commentDtoList[index].likeCount + 1);
+                sessionStorage.setItem(JSON.stringify({
+                    username: this.username,
+                    cid: this.commentDtoList[index].id
+                }), '1');
+                this.showLike[index] = false;
+                location.href = "question.html";
+            },
+            subCommentLike(index) {
+                this.changeCommentLike(this.commentDtoList[index].id, this.commentDtoList[index].likeCount - 1);
+                sessionStorage.setItem(JSON.stringify({
+                    username: this.username,
+                    cid: this.commentDtoList[index].id
+                }), '0');
+                this.showLike[index] = true;
+                location.href = "question.html";
+            },
+            initializeCommentLikeStates() {
+                this.showCommentLike = this.commentDtoList.map((comment) => {
+                    const likeState = sessionStorage.getItem(JSON.stringify({
+                        username: this.username,
+                        cid: comment.id
+                    }));
+                    return likeState !== '1';
+                });
+            },
+        }
+    });
+</script>
+</body>
+</html>

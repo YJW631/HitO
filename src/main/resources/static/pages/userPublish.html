@@ -1,0 +1,165 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>发布</title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css"
+          integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap-theme.min.css"
+          integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"
+            integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+            crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/css/publish.css">
+</head>
+<body>
+<div id="app">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">HitO</span>
+                </button>
+                <a class="navbar-brand" href="#" @click="toIndex">HitO</a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li th:if="${session.user!=null}">
+                        <a href="/pages/publish.html">发布</a>
+                    </li>
+                    <li class="dropdown" v-if="name">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">{{name}}<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" @click="toProfile">我的问题</a></li>
+                            <li><a href="#">个人资料</a></li>
+                            <li><a href="#" @click="logOut">退出登录</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+    <div class="container-fluid main">
+        <div class="row">
+            <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                <h2><span class="glyphicon glyphicon-plus" aria-hidden="true">发起</span></h2>
+                <hr>
+                <form @submit.prevent="publish">
+                    <div class="form-group">
+                        <label for="title">标题:</label>
+                        <input type="text" class="form-control" v-model="title" id="title" name="title"
+                               placeholder="问题标题......">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">描述：</label>
+                        <textarea id="description" name="description" class="form-control" v-model="description"
+                                  cols="30" rows="10" placeholder="请输入问题描述"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="tag">标签</label>
+                        <input type="text" class="form-control" id="tag" v-model="tag" name="tag"
+                               placeholder="输入标签，以逗号分隔">
+                    </div>
+                    <button type="submit" class="btn btn-success btn-publish ">
+                        发布
+                    </button>
+                </form>
+            </div>
+            <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+                <h3>问题发起指南</h3>
+                • 标题: 请用精简的语言描述您发布讨论标题，不超过25字 <br>
+                • 补充: 详细补充您的问题内容，并确保问题描述清晰直观, 并提供一些相关的资料<br>
+                • 标签: 选择一个或者多个合适的标签，用逗号隔开，每个标签不超过10个字<br>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            title: '',
+            description: '',
+            tag: '',
+            name: ''
+        },
+        created: function () {
+            this.getNameBySession();
+        },
+        methods: {
+            async publish() {
+                if(this.title==''){
+                    alert("标题不能为空");
+                    return;
+                }
+                if(this.description==''){
+                    alert("描述不能为空");
+                    return;
+                }
+                if(this.tag==''){
+                    alert("标签不能为空");
+                    return;
+                }
+                let Question = {
+                    title: this.title,
+                    description: this.description,
+                    tag: this.tag
+                }
+                try {
+                    const resp = await axios.post('/user/publish', JSON.stringify(Question), {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        alert("发布成功");
+                        window.location.href="index.html";
+                    } else {
+                        console.log(resp.data.msg);
+                    }
+                } catch (error) {
+                    console.error('发布失败', error);
+                }
+            }, async getNameBySession() {
+                try {
+                    const resp = await axios.get('/user/get/name'
+                    );
+                    if (resp.data.code == 1) {
+                        this.name = resp.data.data;
+                    } else {
+                        window.location.href="login.html";
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async logOut() {
+                try {
+                    const resp = await axios.get('/user/logout');
+                    if (resp.data.code == 1) {
+                        window.location.href = "login.html"
+                    } else {
+                        console.log(resp.msg);
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+
+            },
+            toIndex(){
+                window.location.href="index.html";
+            },
+            toProfile(){
+                window.location.href="profile.html";
+            }
+        }
+    });
+</script>
+</body>
+</html>

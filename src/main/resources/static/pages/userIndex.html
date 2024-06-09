@@ -1,0 +1,285 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>HitO</title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css"
+          integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap-theme.min.css"
+          integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"
+            integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+            crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="app">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">HitO</span>
+                </button>
+                <a class="navbar-brand" href="#" @click="toIndex">HitO</a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <form class="navbar-form navbar-left" @submit.prevent="searchQuestion">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="搜索话题" v-model="searchText">
+                    </div>
+                    <button type="submit" class="btn btn-default">搜索</button>
+                </form>
+                <ul class="nav navbar-nav navbar-right">
+                    <li th:if="${session.user!=null}">
+                        <a href="/pages/publish.html">发布</a>
+                    </li>
+                    <li class="dropdown" v-if="name">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">{{name}}<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" @click="toProfile">我的问题</a></li>
+                            <li><a href="#">个人资料</a></li>
+                            <li><a href="#" @click="logOut">退出登录</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid main">
+        <div class="row">
+            <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                <h2><span class="glyphicon glyphicon-list" aria-hidden="true">发现</span></h2>
+                <hr>
+                <el-pagination
+                        layout="total"
+                        :total=this.questionList.length
+                        v-if="!showPageSelection">
+                </el-pagination>
+                <div class="media" v-for="(item,index) in questionList" :key="index">
+                    <div class="media-left">
+                        <a href="#">
+                            <img class="media-object" :src=item.user.avatarUrl>
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h4 class="media-heading clickable" @click="toQuestion(item.id)">{{item.title}}</h4>
+                        <span class="clickable" @click="toQuestion(item.id)">{{item.description}}</span><br>
+                        <span class="text-desc">{{item.commentCount}} 个回复 • {{item.viewCount}} 次浏览 • {{item.likeCount}} 个赞 • {{item.user.name}}发布于{{item.createTime}}</span>
+                        <a class="text-desc" v-if="item.creator === username" href="javascript:void(0);" @click.prevent="deleteQuestion(item.id)"> 删除</a>
+                    </div>
+                </div>
+                <el-pagination
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="currentPageNumber"
+                        :page-sizes="[10,20,30,40,50]"
+                        :page-size="10"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total=this.total
+                        v-if="showPageSelection">
+                </el-pagination>
+            </div>
+            <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+                <h3>热门话题</h3>
+                <br>
+                <div class="media" v-for="(item,index) in hotQuestionList" :key="index">
+                    <div class="media-left">
+                        <a href="#">
+                            <img class="media-object" :src=item.user.avatarUrl>
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h4 class="media-heading clickable" @click="toQuestion(item.id)">{{item.title}}</h4>
+                        <span class="clickable" @click="toQuestion(item.id)">{{item.description}}</span><br>
+                        <span class="text-desc">{{item.commentCount}} 个回复 • {{item.viewCount}} 次浏览 • {{item.likeCount}} 个赞 • {{item.user.name}}发布于{{item.createTime}}</span>
+                        <a class="text-desc" v-if="item.creator === username" href="javascript:void(0);" @click.prevent="deleteQuestion(item.id)"> 删除</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            name: '',
+            questionList: [],
+            currentPageNumber: 1,
+            size: 10,
+            total: 0,
+            username:'',
+            hotQuestionList:[],
+            searchText:'',
+            showPageSelection:true
+        },
+        created: function () {
+            this.getNameBySession();
+            this.getUsernameBySession();
+            this.getQuestionNumber();
+            this.getQuestionList(this.currentPageNumber, this.size);
+            this.getHotQuestionList();
+        },
+        methods: {
+            async getNameBySession() {
+                try {
+                    const resp = await axios.get('/user/get/name'
+                    );
+                    if (resp.data.code == 1) {
+                        this.name = resp.data.data;
+                    } else {
+                        window.location.href = "login.html";
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async logOut() {
+                try {
+                    const resp = await axios.get('/user/logout');
+                    if (resp.data.code == 1) {
+                        window.location.href = "login.html"
+                    } else {
+                        console.log(resp.msg);
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            toIndex() {
+                window.location.href = "index.html";
+            },
+            async getQuestionList(pageNumber, pageSize) {
+                try {
+                    const resp = await axios.get('/user/questionlist', {
+                        params: {
+                            pageNumber: pageNumber,
+                            pageSize: pageSize
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        this.questionList = resp.data.data;
+                    } else {
+                        console.log(resp.data.data)
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            handleSizeChange(newSize) {
+                this.size = newSize;
+                this.getQuestionList(this.currentPageNumber, this.size);
+            },
+            handleCurrentChange(newPage) {
+                this.currentPageNumber = newPage;
+                this.getQuestionList(this.currentPageNumber, this.size);
+            },
+            async getQuestionNumber() {
+                try {
+                    const resp = await axios.get('/user/questionnumber');
+                    if (resp.data.code == 1) {
+                        this.total = resp.data.data;
+                    } else {
+                        console.log(resp.data.data)
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            toProfile(){
+                window.location.href="profile.html";
+            },
+            async getUsernameBySession() {
+                try {
+                    const resp = await axios.get('/user/get/username'
+                    );
+                    if (resp.data.code == 1) {
+                        this.username = resp.data.data;
+                    } else {
+                        window.location.href = "login.html";
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async deleteQuestion(id) {
+                try {
+                    const resp = await axios.delete('/user/delete', {
+                        params: {
+                            id: id
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        alert(resp.data.data);
+                        this.getQuestionList(this.currentPageNumber, this.size);
+                    } else {
+                        console.log(resp.data.msg);
+                    }
+                } catch (error) {
+                    console.error('删除失败', error);
+                }
+            },
+             async toQuestion(id){
+                 let viewChangeInfo={
+                     id:id
+                 }
+                 try {
+                     const resp = await axios.put('/user/view', JSON.stringify(viewChangeInfo), {
+                         headers: {
+                             'Content-Type': 'application/json'
+                         }
+                     });
+                     if (resp.data.code == 1) {
+
+                     } else {
+
+                     }
+                 } catch (error) {
+                     console.error('修改失败', error);
+                 }
+                sessionStorage.setItem("qid",id);
+                window.location.href="question.html";
+            },
+            async getHotQuestionList(){
+                try {
+                    const resp = await axios.get('/user/hotquestionlist', {
+                    });
+                    if (resp.data.code == 1) {
+                        this.hotQuestionList = resp.data.data;
+                    } else {
+                        console.log(resp.data.data)
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async searchQuestion(){
+                try {
+                    const resp = await axios.get('/user/searchQuestionlist', {
+                        params:{
+                            searchText:this.searchText
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        this.questionList = resp.data.data;
+                        this.showPageSelection=false;
+                    } else {
+                        console.log(resp.data.data)
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>
