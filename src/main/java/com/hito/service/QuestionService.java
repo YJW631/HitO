@@ -37,4 +37,6 @@ public interface QuestionService {
     void pass(Integer id);
 
     void unPass(Integer id);
+
+    Integer administratorCount();
 }

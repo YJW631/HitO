@@ -65,7 +65,7 @@ public class AdministratorController {
 
     @GetMapping("/administrator/questionnumber")
     public Result getQuestionNumber(){
-        return Result.success(questionService.count());
+        return Result.success(questionService.administratorCount());
     }
 
     @GetMapping("/administrator/questionlist")

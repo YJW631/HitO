@@ -56,4 +56,8 @@ public interface QuestionMapper {
 
     @Update("update question set status=2 where id=#{id};")
     void unPass(Integer id);
+
+    @Select("select count(*) from question where status = 1 or status =2;")
+    Integer queryAllCount();
+
 }

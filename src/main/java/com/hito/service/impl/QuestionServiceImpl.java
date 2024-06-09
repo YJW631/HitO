@@ -154,4 +154,9 @@ public class QuestionServiceImpl implements QuestionService {
     public void unPass(Integer id) {
         questionMapper.unPass(id);
     }
+
+    @Override
+    public Integer administratorCount() {
+        return questionMapper.queryAllCount();
+    }
 }
