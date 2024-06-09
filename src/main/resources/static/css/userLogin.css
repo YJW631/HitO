@@ -34,3 +34,8 @@ input[type="text"],input[type="password"],input[type="email"]{
     padding-bottom: 50px;
 }
 
+body{
+    background: url("../image/background1.jpg") no-repeat center center fixed;
+    background-size: cover;
+}
+

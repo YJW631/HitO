@@ -1,10 +1,160 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <title>个人信息</title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css"
+          integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap-theme.min.css"
+          integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"
+            integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+            crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/css/userInfo.css">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 </head>
 <body>
-$END$
+<div id="app">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">HitO</span>
+                </button>
+                <a class="navbar-brand" href="#" @click="toIndex">HitO</a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li th:if="${session.user!=null}">
+                        <a href="/pages/userPublish.html">发布</a>
+                    </li>
+                    <li class="dropdown" v-if="name != ''">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">{{userInfo.name}}<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" @click="toProfile">我的问题</a></li>
+                            <li><a href="#" @click="toUserInfo">个人资料</a></li>
+                            <li><a href="#" @click="logOut">退出登录</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid main">
+        <div class="row">
+            <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
+                <br>
+                <br>
+                <el-form ref="form" :model="userInfo" label-width="80px">
+                    <el-form-item label="头像">
+                        <img :src="userInfo.avatarUrl" alt="Avatar Preview" class="avatar"
+                             style="width: 50px; height: 50px;">
+                    </el-form-item>
+                    <el-form-item label="用户名">
+                        <el-input v-model="userInfo.username" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item label="姓名">
+                        <el-input v-model="userInfo.name" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item label="邮件地址">
+                        <el-input v-model="userInfo.email" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item label="自我介绍">
+                        <el-input v-model="userInfo.selfIntroduction" disabled></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+                <h3>热门话题</h3>
+                <br>
+                <div class="media" v-for="(item, index) in hotQuestionList" :key="index">
+                    <div class="media-left">
+                        <a href="#">
+                            <img class="media-object" :src="item.user.avatarUrl">
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h4 class="media-heading clickable" @click="toQuestion(item.id)">{{item.title}}</h4>
+                        <span class="clickable" @click="toQuestion(item.id)">{{item.description}}</span><br>
+                        <span class="text-desc">{{item.commentCount}} 个回复 • {{item.viewCount}} 次浏览 • {{item.likeCount}} 个赞 • {{item.user.name}}发布于{{item.createTime}}</span>
+                        <a class="text-desc" v-if="item.creator === username" href="javascript:void(0);"
+                           @click.prevent="deleteQuestion(item.id)"> 删除</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            userInfo: {},
+            hotQuestionList: [],
+            username: '',
+            name: ''
+        },
+        created: function () {
+            this.getUserInfoBySession();
+            this.getHotQuestionList();
+        },
+        methods: {
+            async getUserInfoBySession() {
+                try {
+                    const resp = await axios.get('/user/get/userinfo');
+                    if (resp.data.code == 1) {
+                        this.userInfo = resp.data.data;
+                    } else {
+                        window.location.href = "userLogin.html";
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            toProfile() {
+                window.location.href = "userProfile.html";
+            },
+            toIndex() {
+                window.location.href = "userIndex.html";
+            },
+            async getHotQuestionList() {
+                try {
+                    const resp = await axios.get('/user/hotquestionlist', {});
+                    if (resp.data.code == 1) {
+                        this.hotQuestionList = resp.data.data;
+                        this.username = resp.data.data.username;
+                        this.name = resp.data.data.name;
+                    } else {
+                        console.log(resp.data.msg);
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async logOut() {
+                try {
+                    const resp = await axios.get('/userlogout');
+                    if (resp.data.code == 1) {
+                        window.location.href = "userLogin.html";
+                    } else {
+                        console.log(resp.msg);
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            toUserInfo(){
+                window.location.href="userInfo.html";
+            }
+        }
+    });
+</script>
 </body>
 </html>

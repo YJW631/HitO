@@ -1,8 +1,8 @@
-package com.hito.model;
+package com.hito.vo;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 public class Question {
@@ -14,6 +14,7 @@ public class Question {
     private Integer viewCount;
     private Integer likeCount;
     private String creator;
-    private Long createTime;
-    private Long updateTime;
+    private Integer status;
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
 }

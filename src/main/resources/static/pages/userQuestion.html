@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>HitO</title>
+    <title>question</title>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8">
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
@@ -13,7 +13,7 @@
             integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
             crossorigin="anonymous"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <link rel="stylesheet" href="/css/question.css">
+    <link rel="stylesheet" href="/css/userQuestion.css">
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 </head>
@@ -32,14 +32,14 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                     <li th:if="${session.user!=null}">
-                        <a href="/pages/publish.html">发布</a>
+                        <a href="/pages/userPublish.html">发布</a>
                     </li>
                     <li class="dropdown" v-if="name">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                            aria-expanded="false">{{name}}<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="#" @click="toProfile">我的问题</a></li>
-                            <li><a href="#">个人资料</a></li>
+                            <li><a href="#" @click="toUserInfo">个人资料</a></li>
                             <li><a href="#" @click="logOut">退出登录</a></li>
                         </ul>
                     </li>
@@ -60,7 +60,7 @@
                     <span class="glyphicon glyphicon-thumbs-up text-desc" aria-hidden="true" style="color: orange"
                           v-if="!showLike" @click="subLike"></span>
                     <a class="text-desc" v-if="questionDto.creator === username" href="javascript:void(0);"
-                       @click.prevent="deleteQuestion(item.id)"> 删除</a>
+                       @click.prevent="deleteQuestion(questionDto.id)"> 删除</a>
                 </div>
                 <br>
                 <div class="media-body">
@@ -101,6 +101,20 @@
             </div>
             <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
                 <h3>热门话题</h3>
+                <br>
+                <div class="media" v-for="(item,index) in hotQuestionList" :key="index">
+                    <div class="media-left">
+                        <a href="#">
+                            <img class="media-object" :src=item.user.avatarUrl>
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h4 class="media-heading clickable" @click="toQuestion(item.id)">{{item.title}}</h4>
+                        <span class="clickable" @click="toQuestion(item.id)">{{item.description}}</span><br>
+                        <span class="text-desc">{{item.commentCount}} 个回复 • {{item.viewCount}} 次浏览 • {{item.likeCount}} 个赞 • {{item.user.name}}发布于{{item.createTime}}</span>
+                        <a class="text-desc" v-if="item.creator === username" href="javascript:void(0);" @click.prevent="deleteQuestion(item.id)"> 删除</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -120,12 +134,14 @@
             currentPageNumber: 1,
             size: 10,
             total: 0,
-            showCommentLike: []
+            showCommentLike: [],
+            hotQuestionList:[]
         },
         created: function () {
             this.getNameBySession();
             this.qid = sessionStorage.getItem("qid");
             this.getQuestionById(this.qid);
+            this.getHotQuestionList();
             this.getUsernameBySession().then(() => {
                 if (sessionStorage.getItem(JSON.stringify({
                     username: this.username,
@@ -137,7 +153,7 @@
                 }
             })
             this.getCommentNumber(this.qid);
-            this.getCommentList(this.qid, this.currentPageNumber, this.size).then(()=>{
+            this.getCommentList(this.qid, this.currentPageNumber, this.size).then(() => {
                 this.initializeCommentLikeStates();
             })
         },
@@ -149,7 +165,7 @@
                     if (resp.data.code == 1) {
                         this.name = resp.data.data;
                     } else {
-                        window.location.href = "login.html";
+                        window.location.href = "userLogin.html";
                     }
                 } catch (error) {
                     console.error('获取失败', error);
@@ -157,9 +173,9 @@
             },
             async logOut() {
                 try {
-                    const resp = await axios.get('/user/logout');
+                    const resp = await axios.get('/userlogout');
                     if (resp.data.code == 1) {
-                        window.location.href = "login.html"
+                        window.location.href = "userLogin.html"
                     } else {
                         console.log(resp.msg);
                     }
@@ -168,7 +184,7 @@
                 }
             },
             toIndex() {
-                window.location.href = "index.html";
+                window.location.href = "userIndex.html";
             },
             async getUsernameBySession() {
                 try {
@@ -177,7 +193,7 @@
                     if (resp.data.code == 1) {
                         this.username = resp.data.data;
                     } else {
-                        window.location.href = "login.html";
+                        window.location.href = "userLogin.html";
                     }
                 } catch (error) {
                     console.error('获取失败', error);
@@ -192,7 +208,7 @@
                     });
                     if (resp.data.code == 1) {
                         alert(resp.data.data);
-                        this.getQuestionList(this.currentPageNumber, this.size);
+                        window.location.href="userIndex.html";
                     } else {
                         console.log(resp.data.msg);
                     }
@@ -201,7 +217,7 @@
                 }
             },
             toProfile() {
-                window.location.href = "profile.html";
+                window.location.href = "userProfile.html";
             },
             async getQuestionById(id) {
                 try {
@@ -247,7 +263,7 @@
                     qid: this.qid
                 }), '1');
                 this.showLike = false;
-                location.href = "question.html";
+                location.href = "userQuestion.html";
             },
             subLike() {
                 this.changeLike(this.qid, this.questionDto.likeCount - 1);
@@ -256,7 +272,7 @@
                     qid: this.qid
                 }), '0');
                 this.showLike = true;
-                location.href = "question.html";
+                location.href = "userQuestion.html";
             },
             async submitComment() {
                 let comment = {
@@ -272,7 +288,7 @@
                     });
                     if (resp.data.code == 1) {
                         alert("评论成功");
-                        window.location.href = "question.html";
+                        window.location.href = "userQuestion.html";
                     } else {
                         console.log(resp.data.msg);
                     }
@@ -349,7 +365,7 @@
                     cid: this.commentDtoList[index].id
                 }), '1');
                 this.showLike[index] = false;
-                location.href = "question.html";
+                location.href = "userQuestion.html";
             },
             subCommentLike(index) {
                 this.changeCommentLike(this.commentDtoList[index].id, this.commentDtoList[index].likeCount - 1);
@@ -358,7 +374,7 @@
                     cid: this.commentDtoList[index].id
                 }), '0');
                 this.showLike[index] = true;
-                location.href = "question.html";
+                location.href = "userQuestion.html";
             },
             initializeCommentLikeStates() {
                 this.showCommentLike = this.commentDtoList.map((comment) => {
@@ -369,6 +385,62 @@
                     return likeState !== '1';
                 });
             },
+            async deleteComment(id) {
+                try {
+                    const resp = await axios.delete('/user/deletecomment', {
+                        params: {
+                            id: id,
+                            qid: this.qid
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        alert(resp.data.data);
+                        this.getCommentList(this.qid, this.currentPageNumber, this.size);
+                        this.getQuestionById(this.qid);
+                    } else {
+                        console.log(resp.data.msg);
+                    }
+                } catch (error) {
+                    console.error('删除失败', error);
+                }
+            },
+            toUserInfo(){
+                window.location.href="userInfo.html";
+            },
+            async getHotQuestionList(){
+                try {
+                    const resp = await axios.get('/user/hotquestionlist', {
+                    });
+                    if (resp.data.code == 1) {
+                        this.hotQuestionList = resp.data.data;
+                    } else {
+                        console.log(resp.data.data)
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async toQuestion(id){
+                let viewChangeInfo={
+                    id:id
+                }
+                try {
+                    const resp = await axios.put('/user/view', JSON.stringify(viewChangeInfo), {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (resp.data.code == 1) {
+
+                    } else {
+
+                    }
+                } catch (error) {
+                    console.error('修改失败', error);
+                }
+                sessionStorage.setItem("qid",id);
+                window.location.href="userQuestion.html";
+            }
         }
     });
 </script>

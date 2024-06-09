@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Login</title>
+    <title>用户登录</title>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css"
@@ -14,41 +14,33 @@
             integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
             crossorigin="anonymous"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <link rel="stylesheet" href="/css/login.css">
-
+    <link rel="stylesheet" href="/css/userLogin.css">
 </head>
 <body>
 <div id="app">
     <div class="container">
+        <h1 style="color: aliceblue;text-align: center;font-size: 65px;font-family: sans-serif;">工大圈子</h1>
         <div class="form row">
             <form class="form-horizontal col-sm-offset-3 col-md-offset-3" @submit.prevent="login">
                 <h3 class="form-title">登录</h3>
                 <div class="col-sm-9 col-md-9">
                     <div class="form-group">
-                        <!--        用户名图标和用户名输入框            -->
                         <i class="fa fa-user" aria-hidden="true"></i>
-                        <input class="form-control" type="text" name="username" id="username" v-model="username" placeholder="请输入用户名"
-                               required autofocus>
+                        <input class="form-control" type="text" name="username" id="username" v-model="username" placeholder="请输入用户名" required autofocus>
                     </div>
-                    <!--        密码图标和密码输入框                -->
                     <div class="form-group">
                         <i class="fa fa-key" aria-hidden="true"></i>
-                        <input class="form-control " type="password" name="password" id="password" v-model="password"
-                               placeholder="请输入密码"
-                               required>
+                        <input class="form-control" type="password" name="password" id="password" v-model="password" placeholder="请输入密码" required>
                     </div>
-                    <!--        用超链接跳转到注册页面               -->
                     <div class="form-group">
                         <br>
                         <a href="#" @click="toRegister">没有账号？立即注册</a>
                         <br>
                         <a href="#" @click="toAdministratorLogin">管理员登录</a>
                     </div>
-                    <!--         登录按钮           -->
-                    <div class="form-group">
+                    <div class="form-group" id="button">
                         <input type="submit" value="登录" class="btn btn-success pull-right">
                     </div>
-
                 </div>
             </form>
         </div>
@@ -63,8 +55,8 @@
         },
         methods: {
             async login() {
-                let loginUser={
-                    username:this.username,
+                let loginUser = {
+                    username: this.username,
                     password: this.password
                 }
                 try {
@@ -74,25 +66,24 @@
                         }
                     });
                     if (resp.data.code == 1) {
-                        window.location.href="index.html";
+                        window.location.href = "userIndex.html";
                     } else {
                         alert(resp.data.msg);
-                        this.username="";
-                        this.password="";
+                        this.username = "";
+                        this.password = "";
                     }
                 } catch (error) {
                     console.error('登录失败', error);
                 }
             },
-            toRegister(){
-                window.location.href="register.html";
+            toRegister() {
+                window.location.href = "userRegister.html";
             },
-            toAdministratorLogin(){
-                window.location.href="administratorLogin.html"
+            toAdministratorLogin() {
+                window.location.href = "administratorLogin.html"
             }
         }
-        });
+    });
 </script>
 </body>
 </html>
-

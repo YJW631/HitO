@@ -1,4 +1,4 @@
-package com.hito.dto;
+package com.hito.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

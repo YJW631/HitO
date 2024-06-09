@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Register</title>
+    <title>用户注册</title>
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css"
@@ -14,13 +14,14 @@
             integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
             crossorigin="anonymous"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <link rel="stylesheet" href="/css/register.css">
+    <link rel="stylesheet" href="/css/userRegister.css">
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 </head>
 <body>
 <div id="app">
     <div class="container">
+        <h1 style="color: aliceblue;text-align: center;font-size: 40px;font-family: sans-serif;">工大圈子</h1>
         <div class="form row">
             <form class="form-horizontal col-sm-offset col-md-offset-3" @submit.prevent="register">
                 <h3 class="form-title">注册</h3>
@@ -137,7 +138,7 @@
         },
         methods: {
             toLogin() {
-                window.location.href = "login.html";
+                window.location.href = "userLogin.html";
             },
             async register() {
                 if (this.newUser.password !== this.resetpw) {
@@ -153,9 +154,10 @@
                     });
                     if (resp.data.code == 1) {
                         console.log("注册成功");
-                        window.location.href = "login.html";
+                        window.location.href = "userLogin.html";
                     } else {
-                        console.log(resp.msg);
+                        alert(resp.data.msg);
+                        this.newUser.username='';
                     }
                 } catch (error) {
                     console.error('注册失败', error);

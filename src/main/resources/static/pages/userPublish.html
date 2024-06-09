@@ -13,7 +13,7 @@
             integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
             crossorigin="anonymous"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <link rel="stylesheet" href="/css/publish.css">
+    <link rel="stylesheet" href="/css/userPublish.css">
 </head>
 <body>
 <div id="app">
@@ -30,14 +30,14 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                     <li th:if="${session.user!=null}">
-                        <a href="/pages/publish.html">发布</a>
+                        <a href="/pages/userPublish.html">发布</a>
                     </li>
                     <li class="dropdown" v-if="name">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                            aria-expanded="false">{{name}}<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="#" @click="toProfile">我的问题</a></li>
-                            <li><a href="#">个人资料</a></li>
+                            <li><a href="#" @click="toUserInfo">个人资料</a></li>
                             <li><a href="#" @click="logOut">退出登录</a></li>
                         </ul>
                     </li>
@@ -119,7 +119,7 @@
                     });
                     if (resp.data.code == 1) {
                         alert("发布成功");
-                        window.location.href="index.html";
+                        window.location.href="userIndex.html";
                     } else {
                         console.log(resp.data.msg);
                     }
@@ -133,7 +133,7 @@
                     if (resp.data.code == 1) {
                         this.name = resp.data.data;
                     } else {
-                        window.location.href="login.html";
+                        window.location.href="userLogin.html";
                     }
                 } catch (error) {
                     console.error('获取失败', error);
@@ -141,9 +141,9 @@
             },
             async logOut() {
                 try {
-                    const resp = await axios.get('/user/logout');
+                    const resp = await axios.get('/userlogout');
                     if (resp.data.code == 1) {
-                        window.location.href = "login.html"
+                        window.location.href = "userLogin.html"
                     } else {
                         console.log(resp.msg);
                     }
@@ -153,10 +153,13 @@
 
             },
             toIndex(){
-                window.location.href="index.html";
+                window.location.href="userIndex.html";
             },
             toProfile(){
-                window.location.href="profile.html";
+                window.location.href="userProfile.html";
+            },
+            toUserInfo(){
+                window.location.href="userInfo.html";
             }
         }
     });
