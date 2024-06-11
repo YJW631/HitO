@@ -86,9 +86,20 @@ public class IndexController {
     }
 
     @GetMapping("/user/get/userinfo")
-    public Result getUserBySession(HttpServletRequest request) {
-        User user = (User) request.getSession().getAttribute("user");
-        return Result.success(user);
+    public Result getUserBySession(HttpServletRequest request, @RequestParam("from") Integer from) {
+        if (from == 0) {
+            User user = (User) request.getSession().getAttribute("user");
+            return Result.success(user);
+        } else {
+            User user = (User) request.getSession().getAttribute("userInfo");
+            return Result.success(user);
+        }
+    }
+
+    @PutMapping("/user/setuserinfo")
+    public Result setUserInfoInSession(@RequestBody User user, HttpServletRequest request) {
+        request.getSession().setAttribute("userInfo", user);
+        return Result.success();
     }
 
 }

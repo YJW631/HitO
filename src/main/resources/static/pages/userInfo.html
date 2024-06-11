@@ -34,9 +34,9 @@
                     <li th:if="${session.user!=null}">
                         <a href="/pages/userPublish.html">发布</a>
                     </li>
-                    <li class="dropdown" v-if="name != ''">
+                    <li class="dropdown" v-if="originUserInfo.name != ''">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                           aria-expanded="false">{{userInfo.name}}<span class="caret"></span></a>
+                           aria-expanded="false">{{originUserInfo.name}}<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="#" @click="toProfile">我的问题</a></li>
                             <li><a href="#" @click="toUserInfo">个人资料</a></li>
@@ -77,14 +77,14 @@
                 <div class="media" v-for="(item, index) in hotQuestionList" :key="index">
                     <div class="media-left">
                         <a href="#">
-                            <img class="media-object" :src="item.user.avatarUrl">
+                            <img class="media-object" :src="item.user.avatarUrl" @click="imgToUserInfo(item.user)">
                         </a>
                     </div>
                     <div class="media-body">
                         <h4 class="media-heading clickable" @click="toQuestion(item.id)">{{item.title}}</h4>
                         <span class="clickable" @click="toQuestion(item.id)">{{item.description}}</span><br>
                         <span class="text-desc">{{item.commentCount}} 个回复 • {{item.viewCount}} 次浏览 • {{item.likeCount}} 个赞 • {{item.user.name}}发布于{{item.createTime}}</span>
-                        <a class="text-desc" v-if="item.creator === username" href="javascript:void(0);"
+                        <a class="text-desc" v-if="item.creator === originUserInfo.username" href="javascript:void(0);"
                            @click.prevent="deleteQuestion(item.id)"> 删除</a>
                     </div>
                 </div>
@@ -98,17 +98,22 @@
         data: {
             userInfo: {},
             hotQuestionList: [],
-            username: '',
-            name: ''
+            originUserInfo:{}
         },
         created: function () {
             this.getUserInfoBySession();
+            this.getOriginUserInfo();
             this.getHotQuestionList();
         },
         methods: {
             async getUserInfoBySession() {
+                let from = localStorage.getItem("from");
                 try {
-                    const resp = await axios.get('/user/get/userinfo');
+                    const resp = await axios.get('/user/get/userinfo', {
+                        params: {
+                            from: from
+                        }
+                    });
                     if (resp.data.code == 1) {
                         this.userInfo = resp.data.data;
                     } else {
@@ -129,8 +134,6 @@
                     const resp = await axios.get('/user/hotquestionlist', {});
                     if (resp.data.code == 1) {
                         this.hotQuestionList = resp.data.data;
-                        this.username = resp.data.data.username;
-                        this.name = resp.data.data.name;
                     } else {
                         console.log(resp.data.msg);
                     }
@@ -150,8 +153,42 @@
                     console.error('获取失败', error);
                 }
             },
-            toUserInfo(){
-                window.location.href="userInfo.html";
+            toUserInfo() {
+                localStorage.setItem("from", '0');
+                window.location.href = "userInfo.html";
+            },
+            async imgToUserInfo(user) {
+                try {
+                    const resp = await axios.put('/user/setuserinfo', JSON.stringify(user), {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        localStorage.setItem("from", '1');
+                        window.location.href = "userInfo.html";
+                    } else {
+                        console.log(resp.data.msg);
+                    }
+                } catch (error) {
+                    console.error('跳转失败', error);
+                }
+            },
+            async getOriginUserInfo(){
+                try {
+                    const resp = await axios.get('/user/get/userinfo', {
+                        params: {
+                            from: 0
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        this.originUserInfo = resp.data.data;
+                    } else {
+                        console.log(resp.data.msg);
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
             }
         }
     });

@@ -72,7 +72,7 @@
                     <div class="media" v-for="(item,index) in commentDtoList" :key="index">
                         <div class="media-left">
                             <a href="#">
-                                <img class="media-object" :src=item.user.avatarUrl>
+                                <img class="media-object" :src=item.user.avatarUrl @click="imgToUserInfo(item.user)">
                             </a>
                         </div>
                         <div class="media-body">
@@ -105,7 +105,7 @@
                 <div class="media" v-for="(item,index) in hotQuestionList" :key="index">
                     <div class="media-left">
                         <a href="#">
-                            <img class="media-object" :src=item.user.avatarUrl>
+                            <img class="media-object" :src=item.user.avatarUrl @click="imgToUserInfo(item.user)">
                         </a>
                     </div>
                     <div class="media-body">
@@ -405,6 +405,7 @@
                 }
             },
             toUserInfo(){
+                localStorage.setItem("from", '0');
                 window.location.href="userInfo.html";
             },
             async getHotQuestionList(){
@@ -440,6 +441,23 @@
                 }
                 sessionStorage.setItem("qid",id);
                 window.location.href="userQuestion.html";
+            },
+            async imgToUserInfo(user) {
+                try {
+                    const resp = await axios.put('/user/setuserinfo', JSON.stringify(user), {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        localStorage.setItem("from", '1');
+                        window.location.href = "userInfo.html";
+                    } else {
+                        console.log(resp.data.msg);
+                    }
+                } catch (error) {
+                    console.error('跳转失败', error);
+                }
             }
         }
     });
