@@ -60,4 +60,9 @@ public interface QuestionMapper {
     @Select("select count(*) from question where status = 1 or status =2;")
     Integer queryAllCount();
 
+    @Select("select * from question where status=1 and tag=#{tag} order by create_time desc limit #{offset},#{pageSize};")
+    List<Question> findByTag(@Param("offset") Integer offset, @Param("pageSize") Integer pageSize, @Param("tag") Integer tag);
+
+    @Select("select count(*) from question where status=1 and tag =#{tag};")
+    Integer queryCountByTag(Integer tag);
 }

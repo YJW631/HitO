@@ -44,20 +44,31 @@ public class IndexController {
 
     @GetMapping("/user/questionlist")
     public Result getQuestionList(@RequestParam(name = "pageNumber", defaultValue = "1") Integer pageNumber,
-                                  @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
-        List<QuestionDto> questionDtoList = questionService.findAllQuestion(pageNumber, pageSize);
-        return Result.success(questionDtoList);
+                                  @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+                                  @RequestParam(name = "tag", defaultValue = "0") Integer tag) {
+        if (tag == 0) {
+            List<QuestionDto> questionDtoList = questionService.findAllQuestion(pageNumber, pageSize);
+            return Result.success(questionDtoList);
+        } else {
+            List<QuestionDto> questionDtoList = questionService.findQuestionByTag(pageNumber, pageSize, tag);
+            return Result.success(questionDtoList);
+        }
     }
 
     @GetMapping("/user/questionnumber")
-    public Result getQuestionNumber() {
-        Integer questionNumber=questionService.count();
-        return Result.success(questionNumber);
+    public Result getQuestionNumber(@RequestParam(name = "tag", defaultValue = "0") Integer tag) {
+        if (tag == 0) {
+            Integer questionNumber = questionService.count();
+            return Result.success(questionNumber);
+        } else {
+            Integer questionNumber = questionService.countByTag(tag);
+            return Result.success(questionNumber);
+        }
     }
 
     @PutMapping("/user/view")
-    public Result changeView(@RequestBody Map<String, String> changeInfo){
-        Integer id= Integer.valueOf(changeInfo.get("id"));
+    public Result changeView(@RequestBody Map<String, String> changeInfo) {
+        Integer id = Integer.valueOf(changeInfo.get("id"));
         questionService.view(id);
         return Result.success();
     }
@@ -69,7 +80,7 @@ public class IndexController {
     }
 
     @GetMapping("/user/searchQuestionlist")
-    public Result getSearchQuestionList(@RequestParam(name = "searchText") String searchText){
+    public Result getSearchQuestionList(@RequestParam(name = "searchText") String searchText) {
         List<QuestionDto> searchQuestionDtoList = questionService.findSearchQuestion(searchText);
         return Result.success(searchQuestionDtoList);
     }

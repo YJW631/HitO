@@ -159,4 +159,23 @@ public class QuestionServiceImpl implements QuestionService {
     public Integer administratorCount() {
         return questionMapper.queryAllCount();
     }
+
+    @Override
+    public List<QuestionDto> findQuestionByTag(Integer pageNumber, Integer pageSize, Integer tag) {
+        List<Question> questionList = questionMapper.findByTag((pageNumber - 1) * pageSize, pageSize,tag);
+        List<QuestionDto> questionDtoList = new ArrayList<>();
+        for (Question question : questionList) {
+            User user = userMapper.findByUsername(question.getCreator());
+            QuestionDto questionDto = new QuestionDto();
+            BeanUtils.copyProperties(question, questionDto);
+            questionDto.setUser(user);
+            questionDtoList.add(questionDto);
+        }
+        return questionDtoList;
+    }
+
+    @Override
+    public Integer countByTag(Integer tag) {
+        return questionMapper.queryCountByTag(tag);
+    }
 }

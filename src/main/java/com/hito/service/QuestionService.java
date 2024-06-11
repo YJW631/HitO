@@ -39,4 +39,8 @@ public interface QuestionService {
     void unPass(Integer id);
 
     Integer administratorCount();
+
+    List<QuestionDto> findQuestionByTag(Integer pageNumber, Integer pageSize, Integer tag);
+
+    Integer countByTag(Integer tag);
 }
