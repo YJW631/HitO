@@ -40,6 +40,7 @@
                         <ul class="dropdown-menu">
                             <li><a href="#" @click="toProfile">我的问题</a></li>
                             <li><a href="#" @click="toUserInfo">个人资料</a></li>
+                            <li><a href="#" @click="toUserChange">修改密码</a></li>
                             <li><a href="#" @click="logOut">退出登录</a></li>
                         </ul>
                     </li>
@@ -168,6 +169,10 @@
             toUserInfo(){
                 localStorage.setItem("from", '0');
                 window.location.href="userInfo.html";
+            },
+            toUserChange(){
+                localStorage.setItem("tag", '0');
+                window.location.href="userChange.html";
             }
         }
     });

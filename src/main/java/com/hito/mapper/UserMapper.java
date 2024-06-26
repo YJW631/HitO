@@ -31,4 +31,13 @@ public interface UserMapper {
 
     @Select("select token from user where username=#{username};")
     String selectTokenByUsername(String username);
+
+    @Select("select * from user where username=#{username} and name=#{name} and email=#{email};")
+    List<User> findByRecoverInfo(@Param("username") String username, @Param("name") String name, @Param("email") String email);
+
+    @Update("update user set password=#{password} where username=#{username};")
+    void updatePassword(@Param("username") String username, @Param("password") String password);
+
+    @Update("update user set password=#{newHash1} where username=#{username};")
+    void updateHash1(@Param("username") String username, @Param("newHash1") String newHash1);
 }

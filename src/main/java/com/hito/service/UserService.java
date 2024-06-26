@@ -19,4 +19,8 @@ public interface UserService {
     Integer findUserNumber();
 
     String getToken(String username);
+
+    Result recover(User user);
+
+    void change(String username, String newHash1);
 }

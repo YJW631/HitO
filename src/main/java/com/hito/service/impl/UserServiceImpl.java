@@ -75,4 +75,19 @@ public class UserServiceImpl implements UserService {
     public String getToken(String username) {
         return userMapper.selectTokenByUsername(username);
     }
+
+    @Override
+    public Result recover(User user) {
+        List<User> userList=userMapper.findByRecoverInfo(user.getUsername(),user.getName(),user.getEmail());
+        if(!userList.isEmpty()){
+            userMapper.updatePassword(user.getUsername(),user.getPassword());
+            return Result.success("密码找回成功");
+        }
+        return Result.error("找回信息填写错误");
+    }
+
+    @Override
+    public void change(String username, String newHash1) {
+        userMapper.updateHash1(username,newHash1);
+    }
 }
