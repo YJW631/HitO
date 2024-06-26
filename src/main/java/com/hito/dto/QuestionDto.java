@@ -16,6 +16,7 @@ public class QuestionDto {
     private Integer likeCount;
     private String creator;
     private Integer status;
+    private Integer haveNew;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
     private User user;

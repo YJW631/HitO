@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>我的问题</title>
+    <title>最新回复</title>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8">
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
@@ -77,8 +77,8 @@
                 </el-pagination>
             </div>
             <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12" style="top: 80px">
-                <a href="#" class="side-a active" @click="toProfile">我的问题</a>
-                <a href="#" class="side-a" @click="newestComment">最新回复</a>
+                <a href="#" class="side-a" @click="toProfile">我的问题</a>
+                <a href="#" class="side-a active" @click="newestComment">最新回复</a>
             </div>
         </div>
     </div>
@@ -98,8 +98,8 @@
         created: function () {
             this.getNameBySession();
             this.getUsernameBySession().then(() => {
-                this.getMyQuestionNumber(this.username);
-                this.getMyQuestionList(this.currentPageNumber, this.size, this.username);
+                this.getQuestionNumberWithNewComment(this.username);
+                this.getQuestionListWithNewComment(this.currentPageNumber, this.size, this.username);
             })
         },
         methods: {
@@ -144,9 +144,9 @@
             toIndex() {
                 window.location.href = "userIndex.html";
             },
-            async getMyQuestionList(pageNumber, pageSize, username) {
+            async getQuestionListWithNewComment(pageNumber, pageSize, username) {
                 try {
-                    const resp = await axios.get('/user/myquestionlist', {
+                    const resp = await axios.get('/user/myquestionlistwnc', {
                         params: {
                             pageNumber: pageNumber,
                             pageSize: pageSize,
@@ -164,15 +164,15 @@
             },
             handleSizeChange(newSize) {
                 this.size = newSize;
-                this.getMyQuestionList(this.currentPageNumber, this.size, this.username);
+                this.getQuestionListWithNewComment(this.currentPageNumber, this.size, this.username);
             },
             handleCurrentChange(newPage) {
                 this.currentPageNumber = newPage;
-                this.getMyQuestionList(this.currentPageNumber, this.size, this.username);
+                this.getQuestionListWithNewComment(this.currentPageNumber, this.size, this.username);
             },
-            async getMyQuestionNumber(username) {
+            async getQuestionNumberWithNewComment(username) {
                 try {
-                    const resp = await axios.get('/user/myquestionnumber', {
+                    const resp = await axios.get('/user/myquestionnumberwnc', {
                         params: {
                             username: username
                         }
@@ -201,7 +201,7 @@
                     });
                     if (resp.data.code == 1) {
                         alert(resp.data.data);
-                        this.getMyQuestionList(this.currentPageNumber, this.size, this.username);
+                        this.getQuestionListWithNewComment(this.currentPageNumber, this.size, this.username);
                     } else {
                         console.log(resp.data.msg);
                     }

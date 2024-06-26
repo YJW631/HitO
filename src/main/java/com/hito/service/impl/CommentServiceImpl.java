@@ -3,6 +3,7 @@ package com.hito.service.impl;
 import com.hito.dto.CommentDto;
 import com.hito.dto.QuestionDto;
 import com.hito.mapper.CommentMapper;
+import com.hito.mapper.QuestionMapper;
 import com.hito.mapper.UserMapper;
 import com.hito.service.CommentService;
 import com.hito.vo.Comment;
@@ -25,11 +26,15 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private QuestionMapper questionMapper;
+
     @Override
     public void addComment(Comment comment) {
         comment.setCreateTime(LocalDateTime.now());
         comment.setUpdateTime(LocalDateTime.now());
         commentMapper.insert(comment);
+        questionMapper.haveNew(comment.getAscription());
     }
 
     @Override

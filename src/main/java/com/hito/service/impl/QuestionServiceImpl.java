@@ -178,4 +178,28 @@ public class QuestionServiceImpl implements QuestionService {
     public Integer countByTag(Integer tag) {
         return questionMapper.queryCountByTag(tag);
     }
+
+    @Override
+    public void deleteNew(Integer id) {
+        questionMapper.deleteNew(id);
+    }
+
+    @Override
+    public List<QuestionDto> findMyQuestionWithNewComment(Integer pageNumber, Integer pageSize, String username) {
+        List<Question> questionList = questionMapper.findMyQuestionWithNewComment((pageNumber - 1) * pageSize, pageSize,username);
+        List<QuestionDto> questionDtoList = new ArrayList<>();
+        for (Question question : questionList) {
+            User user = userMapper.findByUsername(question.getCreator());
+            QuestionDto questionDto = new QuestionDto();
+            BeanUtils.copyProperties(question, questionDto);
+            questionDto.setUser(user);
+            questionDtoList.add(questionDto);
+        }
+        return questionDtoList;
+    }
+
+    @Override
+    public Integer countMyQuestionWithNewComment(String username) {
+        return questionMapper.queryMyCountWithNewComment(username);
+    }
 }

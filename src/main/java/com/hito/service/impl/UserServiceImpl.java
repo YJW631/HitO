@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,8 +33,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User login(String username, String password) {
-        return userMapper.findByUsernameAndPassword(username,password);
+    public String login(String username, String hash2, String verificationCode) {
+        String hash1_db=userMapper.selectByUsername(username);
+        if(hash1_db==""){
+            return "";
+        }
+        String hash2_nd="";
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] md5 = md.digest((hash1_db+verificationCode).getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : md5) {
+                sb.append(String.format("%02x", b));
+            }
+            hash2_nd=sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        if(hash2_nd.equals(hash2)){
+            return hash1_db;
+        }
+        return "";
     }
 
     @Override
@@ -47,5 +69,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public Integer findUserNumber() {
         return userMapper.count();
+    }
+
+    @Override
+    public String getToken(String username) {
+        return userMapper.selectTokenByUsername(username);
     }
 }

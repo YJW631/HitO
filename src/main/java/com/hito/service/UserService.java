@@ -10,11 +10,13 @@ public interface UserService {
 
     Result add(User user);
 
-    User login(String username, String password);
+    String login(String username, String hash2, String verificationCode);
 
     User findUserByToken(String token);
 
     List<User> findAllUser(Integer pageNumber, Integer pageSize);
 
     Integer findUserNumber();
+
+    String getToken(String username);
 }

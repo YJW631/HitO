@@ -6,7 +6,8 @@ import com.hito.vo.Question;
 import java.util.List;
 
 public interface QuestionService {
-     List<QuestionDto> findAllQuestion(Integer pageNumber,Integer pageSize);
+
+    List<QuestionDto> findAllQuestion(Integer pageNumber, Integer pageSize);
 
     void addNewQuestion(Question question);
 
@@ -43,4 +44,10 @@ public interface QuestionService {
     List<QuestionDto> findQuestionByTag(Integer pageNumber, Integer pageSize, Integer tag);
 
     Integer countByTag(Integer tag);
+
+    void deleteNew(Integer id);
+
+    List<QuestionDto> findMyQuestionWithNewComment(Integer pageNumber, Integer pageSize, String username);
+
+    Integer countMyQuestionWithNewComment(String username);
 }

@@ -65,4 +65,16 @@ public interface QuestionMapper {
 
     @Select("select count(*) from question where status=1 and tag =#{tag};")
     Integer queryCountByTag(Integer tag);
+
+    @Update("update question set have_new=1 where id=#{id};")
+    void haveNew(Integer id);
+
+    @Update("update question set have_new=0 where id=#{id};")
+    void deleteNew(Integer id);
+
+    @Select("select * from question where creator=#{username} and status=1 and have_new=1 order by create_time desc limit #{offset},#{pageSize};")
+    List<Question> findMyQuestionWithNewComment(@Param("offset") Integer offset, @Param("pageSize") Integer pageSize, @Param("username") String username);
+
+    @Select("select count(*) from question where creator=#{username} and status=1 and have_new=1;")
+    Integer queryMyCountWithNewComment(String username);
 }

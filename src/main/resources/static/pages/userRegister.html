@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="/css/userRegister.css">
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script>
 </head>
 <body>
 <div id="app">
@@ -134,7 +135,8 @@
                 "https://p5.itc.cn/q_70/images01/20220709/228d517c2e064b5cb4afc389fc7e1290.jpeg",
                 "https://ts1.cn.mm.bing.net/th/id/R-C.eff415e9e225102b7947f9694c567a67?rik=j20trlqI3C9qCg&riu=http%3a%2f%2fimg.qjsmartech.com%2fTopic%2fImages%2f2022-07%2f2022072515282812784.jpg&ehk=SJh8KV0RUZ9HZzgvMf6NJQp4Ul4e5Eq2Vqo5nBmNTlM%3d&risl=&pid=ImgRaw&r=0"
             ],
-            showAvatarSelection: false
+            showAvatarSelection: false,
+            hash1:''
         },
         methods: {
             toLogin() {
@@ -145,7 +147,10 @@
                     alert("两次输入的密码不一致！");
                     this.newUser.password = '';
                     this.resetpw = '';
+                    return;
                 }
+                this.hash1=md5(this.newUser.username+this.newUser.password);
+                this.newUser.password=this.hash1;
                 try {
                     const resp = await axios.post('/register', JSON.stringify(this.newUser), {
                         headers: {

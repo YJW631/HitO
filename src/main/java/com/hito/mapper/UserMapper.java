@@ -25,4 +25,10 @@ public interface UserMapper {
 
     @Select("select count(*) from user;")
     Integer count();
+
+    @Select("select password from user where username=#{username};")
+    String selectByUsername(String username);
+
+    @Select("select token from user where username=#{username};")
+    String selectTokenByUsername(String username);
 }
