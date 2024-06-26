@@ -15,6 +15,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class AdministratorController {
@@ -28,10 +29,17 @@ public class AdministratorController {
     private QuestionService questionService;
 
     @PostMapping("/administratorlogin")
-    public Result login(@RequestBody Administrator administrator, HttpServletRequest request, HttpServletResponse response) {
-        Administrator loginAdministrator = administratorService.login(administrator.getUsername(), administrator.getPassword());
+    public Result login(@RequestBody Map<String,String> loginAdministrator, HttpServletRequest request, HttpServletResponse response) {
+        String username=loginAdministrator.get("username");
+        String hash2=loginAdministrator.get("hash2");
+        String verificationCode=loginAdministrator.get("verificationCode");
+        String hash1_db=administratorService.login(username,hash2,verificationCode);
+        String token=administratorService.getToken(username);
+        if(hash1_db==""){
+            return Result.error("用户名或密码错误");
+        }
         if (loginAdministrator != null) {
-            Cookie cookie = new Cookie("administrator_token", loginAdministrator.getAdministratorToken());
+            Cookie cookie = new Cookie("administrator_token", token);
             cookie.setMaxAge(60 * 60);
             response.addCookie(cookie);
             return Result.success();

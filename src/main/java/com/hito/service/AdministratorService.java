@@ -6,8 +6,9 @@ import com.hito.vo.User;
 import java.util.List;
 
 public interface AdministratorService {
-    Administrator login(String username, String password);
+    String login(String username, String hash2, String verificationCode);
 
     Administrator findAdministratorByToken(String token);
 
+    String getToken(String username);
 }

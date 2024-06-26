@@ -15,7 +15,8 @@
             crossorigin="anonymous"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="/css/administratorLogin.css">
-
+    <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script>
+    <script src="https://cdn.bootcss.com/crypto-js/3.1.9-1/crypto-js.min.js"></script>
 </head>
 <body>
 <div id="app">
@@ -59,13 +60,20 @@
         el: '#app',
         data: {
             username: '',
-            password: ''
+            password: '',
+            hash1: '',
+            hash2: '',
+            verificationCode: ''
         },
         methods: {
             async login() {
+                this.hash1 = md5(this.username + this.password);
+                this.verificationCode = this.generateRandomCode();
+                this.hash2 = md5(this.hash1 + this.verificationCode);
                 let loginAdministrator = {
                     username: this.username,
-                    password: this.password
+                    hash2: this.hash2,
+                    verificationCode: this.verificationCode
                 }
                 try {
                     const resp = await axios.post('/administratorlogin', JSON.stringify(loginAdministrator), {
@@ -86,6 +94,13 @@
             },
             toLogin() {
                 window.location.href = "userLogin.html";
+            },
+            generateRandomCode() {
+                let code = '';
+                for (let i = 0; i < 8; i++) {
+                    code += Math.floor(Math.random() * 10);
+                }
+                return code;
             }
         }
     });

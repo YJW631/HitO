@@ -15,4 +15,10 @@ public interface AdministratorMapper {
 
     @Select("select * from administrator where administrator_token=#{token};")
     Administrator findByToken(String token);
+
+    @Select("select password from administrator where username=#{username};")
+    String selectByUsername(String username);
+
+    @Select("select administrator_token from administrator where username=#{username};")
+    String selectTokenByUsername(String username);
 }
