@@ -1,7 +1,9 @@
 package com.hito.service.impl;
 
+import com.hito.mapper.QuestionMapper;
 import com.hito.mapper.UserMapper;
 import com.hito.pojo.Result;
+import com.hito.service.QuestionService;
 import com.hito.service.UserService;
 import com.hito.vo.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private QuestionMapper questionMapper;
 
     @Override
     public Result add(User user) {
@@ -89,5 +94,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public void change(String username, String newHash1) {
         userMapper.updateHash1(username,newHash1);
+    }
+
+    @Override
+    public void delete(Integer id) {
+        questionMapper.deleteByCreator(userMapper.findUsernameById(id));
+        userMapper.deleteById(id);
+    }
+
+    @Override
+    public List<User> findAllUserByUsername(Integer pageNumber, Integer pageSize, String username) {
+        return(userMapper.findAllByUsername((pageNumber - 1) * pageSize, pageSize,username));
+    }
+
+    @Override
+    public Integer findUserNumberByUsername(String username) {
+        return userMapper.countByUsername(username);
     }
 }

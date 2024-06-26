@@ -29,13 +29,13 @@ public class AdministratorController {
     private QuestionService questionService;
 
     @PostMapping("/administratorlogin")
-    public Result login(@RequestBody Map<String,String> loginAdministrator, HttpServletRequest request, HttpServletResponse response) {
-        String username=loginAdministrator.get("username");
-        String hash2=loginAdministrator.get("hash2");
-        String verificationCode=loginAdministrator.get("verificationCode");
-        String hash1_db=administratorService.login(username,hash2,verificationCode);
-        String token=administratorService.getToken(username);
-        if(hash1_db==""){
+    public Result login(@RequestBody Map<String, String> loginAdministrator, HttpServletRequest request, HttpServletResponse response) {
+        String username = loginAdministrator.get("username");
+        String hash2 = loginAdministrator.get("hash2");
+        String verificationCode = loginAdministrator.get("verificationCode");
+        String hash1_db = administratorService.login(username, hash2, verificationCode);
+        String token = administratorService.getToken(username);
+        if (hash1_db == "") {
             return Result.error("用户名或密码错误");
         }
         if (loginAdministrator != null) {
@@ -49,13 +49,13 @@ public class AdministratorController {
 
     @GetMapping("/administrator/userlist")
     public Result getUserList(@RequestParam(name = "pageNumber", defaultValue = "1") Integer pageNumber,
-                                  @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+                              @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
         List<User> userList = userService.findAllUser(pageNumber, pageSize);
         return Result.success(userList);
     }
 
     @GetMapping("/administrator/usernumber")
-    public Result getUserNumber(){
+    public Result getUserNumber() {
         return Result.success(userService.findUserNumber());
     }
 
@@ -72,8 +72,8 @@ public class AdministratorController {
     }
 
     @GetMapping("/administrator/questionnumber")
-    public Result getQuestionNumber(){
-        return Result.success(questionService.administratorCount());
+    public Result getQuestionNumber() {
+        return Result.success(questionService.findQuestionNumberOfAnyStatus());
     }
 
     @GetMapping("/administrator/questionlist")
@@ -84,14 +84,44 @@ public class AdministratorController {
     }
 
     @DeleteMapping("/administrator/pass")
-    public Result pass(@RequestParam(name = "id") Integer id){
+    public Result pass(@RequestParam(name = "id") Integer id) {
         questionService.pass(id);
         return Result.success();
     }
 
     @DeleteMapping("/administrator/unpass")
-    public Result unPass(@RequestParam(name = "id") Integer id){
+    public Result unPass(@RequestParam(name = "id") Integer id) {
         questionService.unPass(id);
         return Result.success();
+    }
+
+    @DeleteMapping("/administrator/deleteuser")
+    public Result deleteUser(@RequestParam(name = "id") Integer id) {
+        userService.delete(id);
+        return Result.success();
+    }
+
+    @GetMapping("/administrator/userlistbyusername")
+    public Result getUserListByUsername(@RequestParam(name = "pageNumber", defaultValue = "1") Integer pageNumber,
+                                        @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+                                        @RequestParam(name = "username") String username) {
+        List<User> userList = userService.findAllUserByUsername(pageNumber, pageSize,username);
+        return Result.success(userList);
+    }
+
+    @GetMapping("/administrator/usernumberbyusername")
+    public Result getUserNumberByUsername(@RequestParam(name = "username") String username) {
+        return Result.success(userService.findUserNumberByUsername(username));
+    }
+
+    @GetMapping("/administrator/questionnumberbycontent")
+    public Result getQuestionNumberByContent(@RequestParam(name="content")String content) {
+        return Result.success(questionService.findQuestionNumberOfAnyStatusByContent(content));
+    }
+
+    @GetMapping("/administrator/questionlistbycontent")
+    public Result getQuestionListByContent(@RequestParam(name="content")String content) {
+        List<QuestionDto> questionDtoList = questionService.findAllQuestionOfAnyStatusByContent(content);
+        return Result.success(questionDtoList);
     }
 }

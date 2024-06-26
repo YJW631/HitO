@@ -77,4 +77,7 @@ public interface QuestionMapper {
 
     @Select("select count(*) from question where creator=#{username} and status=1 and have_new=1;")
     Integer queryMyCountWithNewComment(String username);
+
+    @Delete("delete from question where creator=#{username}")
+    void deleteByCreator(String username);
 }

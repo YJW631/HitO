@@ -57,6 +57,18 @@
 
                     <el-container>
                         <el-main>
+                            <form class="navbar-form navbar-left" @submit.prevent="searchUser">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="按用户名搜索用户" v-model="searchText">
+                                </div>
+                                <button type="submit" class="btn btn-default">搜索</button>
+                            </form>
+                            <br>
+                            <el-pagination
+                                    layout="total"
+                                    :total=this.total
+                                    v-if="!showPageSelection">
+                            </el-pagination>
                             <el-table :data="userList">
                                 <el-table-column prop="username" label="用户名" width="140">
                                 </el-table-column>
@@ -68,7 +80,10 @@
                                 </el-table-column>
                                 <el-table-column prop="createTime" label="创建时间" width="200">
                                 </el-table-column>
-                                <el-table-column prop="updateTime" label="更新时间" width="200">
+                                <el-table-column label="操作" width="100">
+                                    <template slot-scope="scope">
+                                        <el-button type="danger" @click="deleteUser(59)">删除用户</el-button>
+                                    </template>
                                 </el-table-column>
                             </el-table>
                             <el-pagination
@@ -78,7 +93,8 @@
                                     :page-sizes="[10,20,30,40,50]"
                                     :page-size="10"
                                     layout="total, sizes, prev, pager, next, jumper"
-                                    :total=this.total>
+                                    :total=this.total
+                                    v-if="showPageSelection">
                             </el-pagination>
                         </el-main>
                     </el-container>
@@ -95,7 +111,9 @@
             currentPageNumber: 1,
             size: 10,
             total: 0,
-            userList: []
+            userList: [],
+            searchText:'',
+            showPageSelection: true
         },
         created: function () {
             this.getNameBySession();
@@ -170,7 +188,65 @@
                 } catch (error) {
                     console.error('获取失败', error);
                 }
+            },
+            async deleteUser(id) {
+                try {
+                    const resp = await axios.delete('/administrator/deleteuser',{
+                        params: {
+                            id:id
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        alert("删除成功");
+                        window.location.href="administratorIndex.html";
+                    } else {
+                        console.log(resp.data.msg);
+                    }
+                } catch (error) {
+                    console.error('删除失败', error);
+                }
+            },
+            searchUser(){
+                this.showPageSelection = false;
+                this.getUserNumberByUsername(this.searchText);
+                this.getUserListByUsername(this.currentPageNumber, this.size,this.searchText);
+            },
+            async getUserNumberByUsername(username) {
+                try {
+                    const resp = await axios.get('/administrator/usernumberbyusername',{
+                        params:{
+                            username:username
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        this.total = resp.data.data;
+                    } else {
+                        console.log(resp.data.data)
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async getUserListByUsername(pageNumber, pageSize,username) {
+                try {
+                    const resp = await axios.get('/administrator/userlistbyusername', {
+                        params: {
+                            pageNumber: pageNumber,
+                            pageSize: pageSize,
+                            username:username
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        this.userList = resp.data.data;
+                    } else {
+                        console.log(resp.data.msg);
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
             }
+
+
 
         }
     });

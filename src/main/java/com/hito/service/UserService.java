@@ -23,4 +23,9 @@ public interface UserService {
     Result recover(User user);
 
     void change(String username, String newHash1);
+    void delete(Integer id);
+
+    List<User> findAllUserByUsername(Integer pageNumber, Integer pageSize, String username);
+
+    Integer findUserNumberByUsername(String username);
 }

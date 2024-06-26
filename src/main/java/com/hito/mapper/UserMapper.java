@@ -43,4 +43,16 @@ public interface UserMapper {
 
     @Select("select * from user where id=#{id}")
     User selectById(Integer integer);
+
+    @Select("select username from user where id=#{id};")
+    String findUsernameById(Integer id);
+
+    @Delete("delete from user where id=#{id};")
+    void deleteById(Integer id);
+
+    @Select("select * from user where username=#{username} order by create_time desc limit #{offset},#{pageSize};")
+    List<User> findAllByUsername(@Param("offset") Integer offset, @Param("pageSize") Integer pageSize,@Param("username") String username);
+
+    @Select("select count(*) from user where username=#{username}; ;")
+    Integer countByUsername(String username);
 }

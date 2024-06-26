@@ -50,4 +50,10 @@ public interface QuestionService {
     List<QuestionDto> findMyQuestionWithNewComment(Integer pageNumber, Integer pageSize, String username);
 
     Integer countMyQuestionWithNewComment(String username);
+
+    Integer findQuestionNumberOfAnyStatus();
+
+    Integer findQuestionNumberOfAnyStatusByContent(String content);
+
+    List<QuestionDto> findAllQuestionOfAnyStatusByContent(String content);
 }

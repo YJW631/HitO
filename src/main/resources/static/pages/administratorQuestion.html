@@ -57,6 +57,18 @@
 
                     <el-container>
                         <el-main>
+                            <form class="navbar-form navbar-left" @submit.prevent="searchQuestion">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="按内容搜索问题" v-model="searchText">
+                                </div>
+                                <button type="submit" class="btn btn-default">搜索</button>
+                            </form>
+                            <br>
+                            <el-pagination
+                                    layout="total"
+                                    :total=this.total
+                                    v-if="!showPageSelection">
+                            </el-pagination>
                             <el-table :data="questionDtoList">
                                 <el-table-column prop="title" label="标题" width="150">
                                 </el-table-column>
@@ -92,7 +104,8 @@
                                     :page-sizes="[10,20,30,40,50]"
                                     :page-size="10"
                                     layout="total, sizes, prev, pager, next, jumper"
-                                    :total=this.total>
+                                    :total=this.total
+                                    v-if="showPageSelection">
                             </el-pagination>
                         </el-main>
                     </el-container>
@@ -109,7 +122,9 @@
             currentPageNumber: 1,
             size: 10,
             total: 0,
-            questionDtoList: []
+            questionDtoList: [],
+            searchText:'',
+            showPageSelection: true
         },
         created: function () {
             this.getNameBySession();
@@ -216,7 +231,45 @@
                 } catch (error) {
                     console.error('删除失败', error);
                 }
+            },
+            searchQuestion() {
+                this.showPageSelection = false;
+                this.getQuestionNumberByContent(this.searchText);
+                this.getQuestionDtoListByContent(this.currentPageNumber, this.size,this.searchText);
+            },
+            async getQuestionNumberByContent(content) {
+                try {
+                    const resp = await axios.get('/administrator/questionnumberbycontent',{
+                        params:{
+                            content:content
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        this.total = resp.data.data;
+                    } else {
+                        console.log(resp.data.data)
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async getQuestionDtoListByContent(pageNumber, pageSize,content) {
+                try {
+                    const resp = await axios.get('/administrator/questionlistbycontent', {
+                        params: {
+                            content:content
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        this.questionDtoList = resp.data.data;
+                    } else {
+                        console.log(resp.data.msg);
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
             }
+
 
         }
     });

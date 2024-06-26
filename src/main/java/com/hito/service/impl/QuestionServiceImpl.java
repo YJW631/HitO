@@ -202,4 +202,29 @@ public class QuestionServiceImpl implements QuestionService {
     public Integer countMyQuestionWithNewComment(String username) {
         return questionMapper.queryMyCountWithNewComment(username);
     }
+
+    @Override
+    public Integer findQuestionNumberOfAnyStatus() {
+        return questionMapper.queryAllCount();
+    }
+
+    @Override
+    public Integer findQuestionNumberOfAnyStatusByContent(String content) {
+        List<Question> searchQuestionList = questionMapper.findAllSearchQuestion(content);
+        return searchQuestionList.size();
+    }
+
+    @Override
+    public List<QuestionDto> findAllQuestionOfAnyStatusByContent(String content) {
+        List<Question> searchQuestionList = questionMapper.findAllSearchQuestion(content);
+        List<QuestionDto> searchQuestionDtoList = new ArrayList<>();
+        for (Question question : searchQuestionList) {
+            User user = userMapper.findByUsername(question.getCreator());
+            QuestionDto questionDto = new QuestionDto();
+            BeanUtils.copyProperties(question, questionDto);
+            questionDto.setUser(user);
+            searchQuestionDtoList.add(questionDto);
+        }
+        return searchQuestionDtoList;
+    }
 }
