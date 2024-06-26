@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>最新回复</title>
+    <title>我的好友</title>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8">
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
@@ -13,7 +13,7 @@
             integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
             crossorigin="anonymous"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <link rel="stylesheet" href="/css/userProfile.css">
+    <link rel="stylesheet" href="/css/userIndex.css">
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 </head>
@@ -32,7 +32,7 @@
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                     <li th:if="${session.user!=null}">
-                        <a href="/pages/userPublish.html">发布</a>
+                        <a class="clickable" @click="toPublish">发布</a>
                     </li>
                     <li class="dropdown" v-if="name">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
@@ -53,9 +53,23 @@
     <div class="container-fluid main">
         <div class="row">
             <div class="col-lg-9 col-md-12 col-sm-12 col-xs-12">
-                <h2><span class="glyphicon glyphicon-list" aria-hidden="true">{{this.pageTitle}}</span></h2>
-                <hr>
-                <div class="media" v-for="(item,index) in questionList" :key="index">
+                <h2><span class="glyphicon glyphicon-list" aria-hidden="true">我的好友</span></h2>
+                <div class="media" v-for="(item,index) in friendList" :key="index">
+                    <div class="media-left">
+                        <a href="#">
+                            <img class="media-object" :src=item.avatarUrl @click="imgToUserInfo(item)">
+                        </a>
+                    </div>
+                    <div class="media-body">
+                        <h5>{{item.name}}</h5>
+                        <span>{{item.email}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
+                <h3>热门话题</h3>
+                <br>
+                <div class="media" v-for="(item,index) in hotQuestionList" :key="index">
                     <div class="media-left">
                         <a href="#">
                             <img class="media-object" :src=item.user.avatarUrl @click="imgToUserInfo(item.user)">
@@ -69,19 +83,6 @@
                            @click.prevent="deleteQuestion(item.id)"> 删除</a>
                     </div>
                 </div>
-                <el-pagination
-                        @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange"
-                        :current-page="currentPageNumber"
-                        :page-sizes="[10,20,30,40,50]"
-                        :page-size="10"
-                        layout="total, sizes, prev, pager, next, jumper"
-                        :total=this.total>
-                </el-pagination>
-            </div>
-            <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12" style="top: 80px">
-                <a href="#" class="side-a" @click="toProfile">我的问题</a>
-                <a href="#" class="side-a active" @click="newestComment">最新回复</a>
             </div>
         </div>
     </div>
@@ -91,19 +92,15 @@
         el: '#app',
         data: {
             name: '',
-            questionList: [],
-            currentPageNumber: 1,
-            size: 10,
-            total: 0,
-            pageTitle: '我的问题',
-            username: ''
+            friendList: [],
+            username: '',
+            hotQuestionList: []
         },
         created: function () {
             this.getNameBySession();
-            this.getUsernameBySession().then(() => {
-                this.getQuestionNumberWithNewComment(this.username);
-                this.getQuestionListWithNewComment(this.currentPageNumber, this.size, this.username);
-            })
+            this.getUsernameBySession();
+            this.getHotQuestionList();
+            this.getFriendList();
         },
         methods: {
             async getNameBySession() {
@@ -112,19 +109,6 @@
                     );
                     if (resp.data.code == 1) {
                         this.name = resp.data.data;
-                    } else {
-                        window.location.href = "userLogin.html";
-                    }
-                } catch (error) {
-                    console.error('获取失败', error);
-                }
-            },
-            async getUsernameBySession() {
-                try {
-                    const resp = await axios.get('/user/get/username'
-                    );
-                    if (resp.data.code == 1) {
-                        this.username = resp.data.data;
                     } else {
                         window.location.href = "userLogin.html";
                     }
@@ -145,113 +129,74 @@
                 }
             },
             toIndex() {
+                localStorage.setItem("tag", '0');
                 window.location.href = "userIndex.html";
             },
-            async getQuestionListWithNewComment(pageNumber, pageSize, username) {
-                try {
-                    const resp = await axios.get('/user/myquestionlistwnc', {
-                        params: {
-                            pageNumber: pageNumber,
-                            pageSize: pageSize,
-                            username: username
-                        }
-                    });
-                    if (resp.data.code == 1) {
-                        this.questionList = resp.data.data;
-                    } else {
-                        console.log(resp.data.data)
-                    }
-                } catch (error) {
-                    console.error('获取失败', error);
-                }
-            },
-            handleSizeChange(newSize) {
-                this.size = newSize;
-                this.getQuestionListWithNewComment(this.currentPageNumber, this.size, this.username);
-            },
-            handleCurrentChange(newPage) {
-                this.currentPageNumber = newPage;
-                this.getQuestionListWithNewComment(this.currentPageNumber, this.size, this.username);
-            },
-            async getQuestionNumberWithNewComment(username) {
-                try {
-                    const resp = await axios.get('/user/myquestionnumberwnc', {
-                        params: {
-                            username: username
-                        }
-                    });
-                    if (resp.data.code == 1) {
-                        this.total = resp.data.data;
-                    } else {
-                        console.log(resp.data.data)
-                    }
-                } catch (error) {
-                    console.error('获取失败', error);
-                }
-            },
             toProfile() {
+                localStorage.setItem("tag", '0');
                 window.location.href = "userProfile.html";
             },
-            newestComment() {
-                window.location.href = "userNewComment.html";
-            },
-            async deleteQuestion(id) {
-                try {
-                    const resp = await axios.delete('/user/delete', {
-                        params: {
-                            id: id
-                        }
-                    });
-                    if (resp.data.code == 1) {
-                        alert(resp.data.data);
-                        this.getQuestionListWithNewComment(this.currentPageNumber, this.size, this.username);
-                    } else {
-                        console.log(resp.data.msg);
-                    }
-                } catch (error) {
-                    console.error('删除失败', error);
-                }
-            },
-            async toQuestion(id) {
-                let viewChangeInfo = {
-                    id: id
-                }
-                try {
-                    const resp = await axios.put('/user/denew', JSON.stringify(viewChangeInfo), {
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    if (resp.data.code == 1) {
-                        console.log("success");
-                    } else {
-                        console.log(resp.data.msg);
-                    }
-                } catch (error) {
-                    console.error('获取失败', error);
-                }
-                try {
-                    const resp = await axios.put('/user/view', JSON.stringify(viewChangeInfo), {
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    if (resp.data.code == 1) {
-
-                    } else {
-
-                    }
-                } catch (error) {
-                    console.error('修改失败', error);
-                }
-                sessionStorage.setItem("qid", id);
-                window.location.href = "userQuestion.html";
-            },
             toUserInfo() {
+                localStorage.setItem("tag", '0');
                 localStorage.setItem("from", '0');
                 window.location.href = "userInfo.html";
             },
+            toPublish() {
+                localStorage.setItem("tag", '0');
+                window.location.href = "userPublish.html";
+            },
+            toUserChange() {
+                localStorage.setItem("tag", '0');
+                window.location.href = "userChange.html";
+            },
+            toFriend() {
+                localStorage.setItem("tag", '0');
+                window.location.href = "userFriend.html";
+            },
+            toChat() {
+                localStorage.setItem("tag", '0');
+                window.location.href = "userChat.html";
+            },
+            async getFriendList() {
+                try {
+                    const resp = await axios.get('/friends/getfriendlist'
+                    );
+                    if (resp.data.code == 1) {
+                        this.friendList=resp.data.data;
+                    } else {
+                        window.location.href = "userLogin.html";
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async getUsernameBySession() {
+                try {
+                    const resp = await axios.get('/user/get/username'
+                    );
+                    if (resp.data.code == 1) {
+                        this.username = resp.data.data;
+                    } else {
+                        window.location.href = "userLogin.html";
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async getHotQuestionList() {
+                try {
+                    const resp = await axios.get('/user/hotquestionlist');
+                    if (resp.data.code == 1) {
+                        this.hotQuestionList = resp.data.data;
+                    } else {
+                        console.log(resp.data.data)
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
             async imgToUserInfo(user) {
+                console.log(user);
                 try {
                     const resp = await axios.put('/user/setuserinfo', JSON.stringify(user), {
                         headers: {
@@ -267,18 +212,6 @@
                 } catch (error) {
                     console.error('跳转失败', error);
                 }
-            },
-            toUserChange(){
-                localStorage.setItem("tag", '0');
-                window.location.href="userChange.html";
-            },
-            toFriend(){
-                localStorage.setItem("tag", '0');
-                window.location.href="userFriend.html";
-            },
-            toChat(){
-                localStorage.setItem("tag", '0');
-                window.location.href="userChat.html";
             }
         }
     });

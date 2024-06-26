@@ -40,4 +40,7 @@ public interface UserMapper {
 
     @Update("update user set password=#{newHash1} where username=#{username};")
     void updateHash1(@Param("username") String username, @Param("newHash1") String newHash1);
+
+    @Select("select * from user where id=#{id}")
+    User selectById(Integer integer);
 }

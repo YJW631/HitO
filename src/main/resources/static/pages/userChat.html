@@ -1,0 +1,446 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>聊天</title>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css"
+          integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap-theme.min.css"
+          integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"
+            integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+            crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="app">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">HitO</span>
+                </button>
+                <a class="navbar-brand" href="#" @click="toIndex">HitO</a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                    <li th:if="${session.user!=null}">
+                        <a class="clickable" @click="toPublish">发布</a>
+                    </li>
+                    <li class="dropdown" v-if="name">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">{{name}}<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" @click="toProfile">我的问题</a></li>
+                            <li><a href="#" @click="toFriend">我的好友</a></li>
+                            <li><a href="#" @click="toChat">聊天</a></li>
+                            <li><a href="#" @click="toUserInfo">个人资料</a></li>
+                            <li><a href="#" @click="toUserChange">修改密码</a></li>
+                            <li><a href="#" @click="logOut">退出登录</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid main">
+        <!-- 使用Element UI的布局组件来创建左右布局 -->
+        <el-container>
+            <!-- 侧边栏 -->
+            <el-aside width="200px">
+                <!-- 好友列表 -->
+                <el-menu :default-openeds="['1']" unique-opened>
+                    <el-submenu index="1">
+                        <template slot="title">好友列表</template>
+                        <el-menu-item v-for="friend in friends" :key="friend.id" :index="'1-' + friend.friendId"
+                                      @click="selectFriend(friend)" :class="{ 'el-menu-item is-active': currentFriend!==null&&currentFriend.friendId === friend.friendId }">
+                            <span v-if="friend.status==='accepted'">{{ friend.username }}</span>
+                            <span v-if="friend.initiator!==userId&&friend.status =='requested'">{{ friend.username }}</span>
+                            <el-button type="text" @click="handleEnsure(friend.userId,friend.friendId)"
+                                       v-if="friend.initiator!==userId&&friend.status =='requested'" type="success" icon="el-icon-check" circle>同意添加
+                            </el-button>
+                        </el-menu-item>
+                    </el-submenu>
+                </el-menu>
+            </el-aside>
+
+            <!-- 主要聊天区域 -->
+            <el-container>
+                <el-header>正在与 {{ currentFriend ? currentFriend.username : '选择一个好友' }} 聊天</el-header>
+                <el-main>
+                    <!-- 消息列表 -->
+                    <el-card class="chat-panel"  id="msg">
+                        <div class="message-item" v-for="(msg, index) in messages" :key="index">
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-divider><span class="message-time">{{ msg.sentAt}}</span></el-divider>
+                                </el-col>
+                            </el-row>
+                            <div class="message-content" id="messageContent">
+
+                                <el-row>
+                                    <div  style="width: 50px;height: 50px;text-align: left">
+                                        <el-avatar  v-if="username== msg.fromBy"
+                                                    src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png">{{msg.fromBy}}}</el-avatar>
+
+                                        <el-avatar v-if="username!=  msg.fromBy"> {{ msg.fromBy }}</el-avatar>
+
+                                    </div>
+                                    <div style="margin-left: 50px">
+                                        <span class="message-text">{{ msg.message }}</span>
+                                    </div>
+                                </el-row>
+
+
+                            </div>
+
+                        </div>
+                    </el-card>
+                </el-main>
+                <el-footer>
+                    <!-- 发送消息输入框和按钮 -->
+                    <el-input
+                            type="textarea"
+                            :rows="4"
+                            placeholder="请输入消息内容"
+                            v-model="inputMessage">
+                    </el-input>
+                    <el-button type="primary" @click="sendMessage">发送消息</el-button>
+                </el-footer>
+            </el-container>
+        </el-container>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            name: '',
+            username: 0,
+            friends: [],
+            currentFriend: null,
+            messages: [],
+            inputMessage: '',
+            webSocket: null,
+            userId:''
+        },
+        created: function () {
+            this.getNameBySession();
+            this.getFriends();
+            const resp = axios.get('/user/get/userinfo', {
+                params: {
+                    from: 0,
+                }
+            }).then(response => {
+                if (response.data.code == 1) {
+                    console.info(response.data.data);
+                    console.info(response.data.data.id);
+                    this.userId=response.data.data.id;
+                    this.username = response.data.data.name
+                    this.initWebSocket();
+                    if(localStorage.getItem("chatFriendId")>0) {
+                        this.selectFriend(this.friends.find(item => item.friendId === Number(localStorage.getItem("chatFriendId"))));
+                    }
+                }
+                if (response.data.code == 0) {
+                    this.selectFriend()
+                }
+            })
+        },
+        methods: {
+            async getNameBySession() {
+                try {
+                    const resp = await axios.get('/user/get/name'
+                    );
+                    if (resp.data.code == 1) {
+                        this.name = resp.data.data;
+                    } else {
+                        window.location.href = "userLogin.html";
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            async logOut() {
+                try {
+                    const resp = await axios.get('/userlogout');
+                    if (resp.data.code == 1) {
+                        window.location.href = "userLogin.html"
+                    } else {
+                        console.log(resp.msg);
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            toIndex() {
+                localStorage.setItem("tag", '0');
+                window.location.href = "userIndex.html";
+            },
+            toProfile() {
+                localStorage.setItem("tag", '0');
+                window.location.href = "userProfile.html";
+            },
+            toUserInfo() {
+                localStorage.setItem("tag", '0');
+                localStorage.setItem("from", '0');
+                window.location.href = "userInfo.html";
+            },
+            toPublish() {
+                localStorage.setItem("tag", '0');
+                window.location.href = "userPublish.html";
+            },
+            toUserChange(){
+                localStorage.setItem("tag", '0');
+                window.location.href="userChange.html";
+            },
+            toFriend(){
+                localStorage.setItem("tag", '0');
+                window.location.href="userFriend.html";
+            },
+            toChat(){
+                localStorage.setItem("tag", '0');
+                window.location.href="userChat.html";
+            },
+            scrollLoad(e) {
+                let that = this
+                // 拉取数
+
+                if(e.srcElement.offsetHeight + e.srcElement.scrollTop >=e.srcElement.scrollHeight && that.List.length / num === that.currentPage){
+                    that.$set(that,'currentPage',that.currentPage +1)
+                    that.getList();
+                }},
+            selectFriend(friend) {
+                this.currentFriend = friend;
+
+                this.messages = []; // 清空消息列表，开始新的聊天
+                const resp = axios.get('/chatRecords/list', {
+                    params: {
+                        sendTo: this.currentFriend.username,
+                        "from": this.username
+                    }
+                }).then(response => {
+                    this.getFriends();
+                    if (response.data.code == 1) {
+                        this.messages = response.data.data
+
+                    }
+                    if (response.data.code == 0) {
+                        this.$message({
+                            type: 'error',
+                            message: '失败!'
+                        });
+                    }
+                })
+                // 或者滚动到页面底部
+                var div = document.getElementById('msg');
+
+                div.scrollTop = div.scrollHeight;
+            },
+            sendMessage() {
+                if (!this.currentFriend) {
+                    this.$message({
+                        type: 'error',
+                        message: '请先选择好友!'
+                    });
+                    return;
+                }
+
+                if (this.inputMessage.trim() && this.currentFriend) {
+                    this.messages.push({
+                        fromBy: this.username,
+                        message: this.inputMessage,
+                        sentAt: this.format(new Date(), 'yyyy-MM-dd HH:mm:ss')
+                    });
+                    if (this.webSocket.readyState === WebSocket.OPEN) {
+                        var message = {
+                            text: this.inputMessage,
+
+                            sendTo: this.currentFriend.username
+                        }
+                        this.webSocket.send(JSON.stringify(message));
+                        // 或者滚动到页面底部
+                        var div = document.getElementById('msg');
+
+                        div.scrollTop = div.scrollHeight + 80;
+
+                    } else {
+                        console.error('WebSocket 连接未打开');
+                    }
+                    this.inputMessage = '';
+                }
+
+            },
+            format(date, formatString) {
+                const pad = (n) => (n < 10 ? '0' + n : n);
+                const year = date.getFullYear();
+                const month = pad(date.getMonth() + 1); // getMonth() 返回的月份是从0开始的
+                const day = pad(date.getDate());
+                const hours = pad(date.getHours());
+                const minutes = pad(date.getMinutes());
+                const seconds = pad(date.getSeconds());
+
+                return formatString
+                    .replace('yyyy', year)
+                    .replace('MM', month)
+                    .replace('dd', day)
+                    .replace('HH', hours)
+                    .replace('mm', minutes)
+                    .replace('ss', seconds);
+            },
+
+            handleEnsure(userId, friendId) {
+                const resp = axios.get('/friends/ensure', {
+                    params: {
+                        userId: userId, friendId: friendId,
+                        "status": "accepted"
+                    }
+                }).then(response => {
+                    this.getFriends();
+                    if (response.data.code == 1) {
+                        this.$message({
+                            type: 'success',
+                            message: '成功!'
+                        });
+                    }
+                    if (response.data.code == 0) {
+                        this.$message({
+                            type: 'error',
+                            message: '失败!'
+                        });
+                    }
+
+                })
+
+            },
+            async getFriends() {
+                const resp = await axios.get('/friends/list', {
+                    params: {}
+                }).then(response => {
+                    if (response.data.code == 1) {
+                        this.friends = response.data.data
+                    }
+                    if (response.data.code == 0) {
+                        this.isFriend = "0"
+                    }
+                })
+            },
+
+            initWebSocket() {
+
+
+                if (window.WebSocket) {
+
+                    this.webSocket = new WebSocket("ws://localhost:8083/imserver/" + this.username);
+                    this.webSocket.onopen = () => {
+                        console.log('WebSocket 连接成功');
+                    };
+                    this.webSocket.onerror = (error) => {
+                        console.error('WebSocket 出现错误:', error);
+                    };
+                    this.webSocket.onmessage = (event) => {
+                        this.handleMessages(event.data);
+                    };
+                    this.webSocket.onclose = () => {
+                        console.log('WebSocket 连接关闭');
+                    };
+                } else {
+                    console.error('浏览器不支持 WebSocket');
+                }
+            },
+            handleMessages(msg) {
+                // 处理从服务器接收到的消息
+                console.log("收到数据====" + msg)
+                let msgJson = JSON.parse(msg);
+                if (msgJson.from == this.currentFriend.username) {
+                    this.messages.push({
+                        fromBy: msgJson.from,
+                        message: msgJson.text,
+                        sentAt: msgJson.sentAt
+                    });
+                    // 或者滚动到页面底部
+                    var div = document.getElementById('msg');
+
+                    div.scrollTop = div.scrollHeight+80;
+                }
+            }
+        },
+        beforeDestroy() {
+            if (this.webSocket) {
+                this.webSocket.close(); // 关闭WebSocket连接
+            }
+        },
+        scrollToBottom() {
+            this.$nextTick(() => {
+                this.$refs.dataContainer.scrollTop = this.$refs.dataContainer.scrollHeight;
+            });
+        }
+    });
+</script>
+<!-- 聊天室样式 -->
+<style>
+    .chat-panel {
+        background-color: #f9f9f9; /* 聊天框背景色 */
+        max-height: 400px;
+        height: 400px;
+        overflow-y: auto;
+        padding: 8px;
+        border: 1px solid #eee;
+        margin-bottom: 10px;
+    }
+
+    .message-item {
+        margin-bottom: 8px;
+        padding: 8px;
+        background-color: white; /* 消息内容背景色 */
+        border-radius: 4px; /* 圆角边框 */
+    }
+
+    .message-content {
+        display: flex;
+        align-items: flex-start;
+    }
+
+    .message-time {
+        color: #999; /* 时间字段颜色 */
+        margin-right: 10px; /* 时间字段与消息内容的间隔 */
+        font-size: 0.85em; /* 时间字段字体大小 */
+    }
+
+    .message-text {
+        margin-left: 8px;
+        word-wrap: break-word; /* 允许在单词边界处换行 */
+        white-space: pre-wrap; /* 保留空白和换行符，同时允许自动换行 */
+    }
+
+    .el-header {
+        padding: 0;
+        background-color: #b3c0d1;
+        line-height: 3;
+        text-align: center;
+    }
+
+    /* 消息发送者是自己的样式 */
+    .my-message {
+        margin-left: auto; /* 靠右对齐 */
+        background-color: #e1f5fe; /* 例如：蓝色背景 */
+    }
+
+    /* 消息发送者是别人的样式 */
+    .other-message {
+        background-color: #ffffff; /* 例如：白色背景 */
+    }
+
+    .el-footer {
+        text-align: right;
+        padding: 8px;
+    }
+</style>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hito.mapper.ChatRecordsMapper">
+
+    <resultMap id="BaseResultMap" type="com.hito.vo.ChatRecords">
+            <id property="chatId" column="chat_id" jdbcType="INTEGER"/>
+            <result property="sendTo" column="send_to" jdbcType="VARCHAR"/>
+            <result property="fromBy" column="from_by" jdbcType="VARCHAR"/>
+            <result property="message" column="message" jdbcType="VARCHAR"/>
+            <result property="sentAt" column="sent_at" jdbcType="TIMESTAMP"/>
+
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        chat_id,send_to,fron,
+        message,sent_at,read_status
+    </sql>
+
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.hito.vo.ChatRecords" >
+        insert into chat_records
+        ( send_to,from_by
+        ,message,sent_at
+        )
+        values (#{sendTo,jdbcType=VARCHAR},#{fromBy,jdbcType=VARCHAR}
+        ,#{message,jdbcType=VARCHAR},#{sentAt,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+</mapper>

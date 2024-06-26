@@ -39,6 +39,8 @@
                            aria-expanded="false">{{originUserInfo.name}}<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="#" @click="toProfile">我的问题</a></li>
+                            <li><a href="#" @click="toFriend">我的好友</a></li>
+                            <li><a href="#" @click="toChat">聊天</a></li>
                             <li><a href="#" @click="toUserInfo">个人资料</a></li>
                             <li><a href="#" @click="toUserChange">修改密码</a></li>
                             <li><a href="#" @click="logOut">退出登录</a></li>
@@ -71,6 +73,46 @@
                         <el-input v-model="userInfo.selfIntroduction" disabled></el-input>
                     </el-form-item>
                 </el-form>
+                <el-button href="#" @click="toFriendList"
+                           v-if="isFriend == '1'&&this.userInfo.id!=this.originUserInfo.id">发起聊天
+                </el-button>
+                <el-button @click="addFriend" v-if="isFriend != '1'&&this.userInfo.id!=this.originUserInfo.id">
+                    添加好友
+                </el-button>
+                <el-button @click="deleteFriend" type="danger" plain v-if="isFriend === '1'&&this.userInfo.id!=this.originUserInfo.id">删除好友</el-button>
+                <hr>
+                <div v-if="isFriend == '1'">
+                    <h3>好友帖子</h3>
+                    <el-pagination
+                            layout="total"
+                            :total=this.questionList.length
+                            v-if="!showPageSelection">
+                    </el-pagination>
+                    <div class="media" v-for="(item,index) in questionList" :key="index">
+                        <div class="media-left">
+                            <a href="#">
+                                <img class="media-object" :src=item.user.avatarUrl @click="imgToUserInfo(item.user)">
+                            </a>
+                        </div>
+                        <div class="media-body">
+                            <h4 class="media-heading clickable" @click="toQuestion(item.id)">{{item.title}}</h4>
+                            <span class="clickable" @click="toQuestion(item.id)">{{item.description}}</span><br>
+                            <span class="text-desc">{{item.commentCount}} 个回复 • {{item.viewCount}} 次浏览 • {{item.likeCount}} 个赞 • {{item.user.name}}发布于{{item.createTime}}</span>
+                            <a class="text-desc" v-if="item.creator === username" href="javascript:void(0);"
+                               @click.prevent="deleteQuestion(item.id)"> 删除</a>
+                        </div>
+                    </div>
+                    <el-pagination
+                            @size-change="handleSizeChange"
+                            @current-change="handleCurrentChange"
+                            :current-page="currentPageNumber"
+                            :page-sizes="[10,20,30,40,50]"
+                            :page-size="10"
+                            layout="total, sizes, prev, pager, next, jumper"
+                            :total=this.total
+                            v-if="showPageSelection">
+                    </el-pagination>
+                </div>
             </div>
             <div class="col-lg-3 col-md-12 col-sm-12 col-xs-12">
                 <h3>热门话题</h3>
@@ -97,16 +139,142 @@
     new Vue({
         el: '#app',
         data: {
+            username:'',
             userInfo: {},
             hotQuestionList: [],
-            originUserInfo:{}
+            originUserInfo: {},
+            name: '',
+            questionList: [],
+            currentPageNumber: 1,
+            size: 10,
+            total: 0,
+            username: '',
+            showPageSelection: true,
+            tagInSession: '',
+            isFriend:0,
         },
         created: function () {
-            this.getUserInfoBySession();
+
+
             this.getOriginUserInfo();
             this.getHotQuestionList();
+            this.getUserInfoBySession().then(()=>{
+                this.getMyQuestionNumber(this.username);
+                this.getMyQuestionList(this.currentPageNumber, this.size,this.username);
+            })
+            // this.isFriendCheck();
+
         },
         methods: {
+            isFriendCheck() {
+                const resp =  axios.get('/friends/get', {
+                    params: {
+                        friendId:  this.userInfo.id,
+                        userId:this.originUserInfo.id,
+                        status:"accepted"
+                    }
+                }).then(response => {
+                    if (response.data.code == 1) {
+                        this.isFriend = "1"
+                    }
+                    if (response.data.code == 0) {
+                        this.isFriend = "0"
+                    }
+                })
+            },
+
+            addFriend() {
+                this.$confirm('确定添加为好友?', '发送好友请求', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    // 请求添加好友接口
+                    try {
+                        const resp =  axios.get('/friends/addRequest', {
+                            params: {
+                                friendId:  this.userInfo.id,
+                                userId:this.originUserInfo.id
+                            }
+                        }).then(response => {
+                            if (response.data.code == 1) {
+                                this.$message({
+                                    type: 'success',
+                                    message: '发送成功!'
+                                });
+                            }
+                            if (response.data.code == 0) {
+                                this.$message({
+
+                                    message: response.data.msg
+                                });
+                            }
+                        })
+                            .catch(error => {
+                                console.error(error);
+                            });
+
+
+                    } catch (error) {
+                        console.error('获取失败', error);
+                    }
+
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '发送取消'
+                    });
+                });
+            },
+            toFriendList(){
+                localStorage.setItem("chatFriendId", this.userInfo.id);
+                window.location.href = "userChat.html";
+            },
+            async getMyQuestionList(pageNumber, pageSize, username) {
+                try {
+                    const resp = await axios.get('/user/myquestionlist', {
+                        params: {
+                            pageNumber: pageNumber,
+                            pageSize: pageSize,
+                            username: username
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        this.questionList = resp.data.data;
+                    } else {
+                        console.log(resp.data.data)
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+            handleSizeChange(newSize) {
+                this.size = newSize;
+                this.getMyQuestionList(this.currentPageNumber, this.size, this.username);
+            },
+            handleCurrentChange(newPage) {
+                this.currentPageNumber = newPage;
+                this.getMyQuestionList(this.currentPageNumber, this.size, this.username);
+            },
+            async getMyQuestionNumber(username) {
+                this.isFriendCheck();
+                try {
+                    const resp = await axios.get('/user/myquestionnumber', {
+                        params: {
+                            username: username
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        this.total = resp.data.data;
+                    } else {
+                        console.log(resp.data.data)
+                    }
+                } catch (error) {
+                    console.error('获取失败', error);
+                }
+            },
+
+
             async getUserInfoBySession() {
                 let from = localStorage.getItem("from");
                 try {
@@ -117,6 +285,8 @@
                     });
                     if (resp.data.code == 1) {
                         this.userInfo = resp.data.data;
+                        console.info(this.userInfo);
+                        this.username = resp.data.data.username;
                     } else {
                         window.location.href = "userLogin.html";
                     }
@@ -175,7 +345,7 @@
                     console.error('跳转失败', error);
                 }
             },
-            async getOriginUserInfo(){
+            async getOriginUserInfo() {
                 try {
                     const resp = await axios.get('/user/get/userinfo', {
                         params: {
@@ -191,9 +361,56 @@
                     console.error('获取失败', error);
                 }
             },
+            toFriend(){
+                localStorage.setItem("tag", '0');
+                window.location.href="userFriend.html";
+            },
+            toChat(){
+                localStorage.setItem("tag", '0');
+                window.location.href="userChat.html";
+            },
             toUserChange(){
                 localStorage.setItem("tag", '0');
                 window.location.href="userChange.html";
+            },
+            async deleteFriend(userId,friendId) {
+                try {
+                    const resp = await axios.delete('/friends/deletefriend', {
+                        params: {
+                            id1:this.originUserInfo.id,
+                            id2:this.userInfo.id
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        alert("删除成功");
+                        window.location.href="userInfo.html";
+                    } else {
+                        alert("删除失败")
+                    }
+                } catch (error) {
+                    console.error('删除失败', error);
+                }
+            },
+            async toQuestion(id) {
+                let viewChangeInfo = {
+                    id: id
+                }
+                try {
+                    const resp = await axios.put('/user/view', JSON.stringify(viewChangeInfo), {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        sessionStorage.setItem("qid", id);
+                        window.location.href = "userQuestion.html";
+                    } else {
+                        console.log(resp.data.msg);
+                    }
+                } catch (error) {
+                    console.error('修改失败', error);
+                }
+
             }
         }
     });

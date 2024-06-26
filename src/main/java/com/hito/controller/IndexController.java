@@ -21,8 +21,6 @@ import java.util.Map;
 @RestController
 public class IndexController {
 
-    @Value("${website.head}")
-    private String websiteHead;
 
     @Autowired
     private UserService userService;

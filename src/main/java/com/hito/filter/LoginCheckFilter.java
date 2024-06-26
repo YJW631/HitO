@@ -72,7 +72,23 @@ public class LoginCheckFilter implements Filter {
                 }
             }
             response.sendRedirect(websiteHead + "/pages/userLogin.html");
-        }else {
+        }else if(url.contains("friends")){
+            if(cookies!=null){
+                for (Cookie cookie : cookies) {
+                    if (cookie.getName().equals("token")) {
+                        String token = cookie.getValue();
+                        User user = userService.findUserByToken(token);
+                        if (user != null) {
+                            request.getSession().setAttribute("user", user);
+                            filterChain.doFilter(servletRequest, servletResponse);
+                            return;
+                        }
+                    }
+                }
+            }
+            response.sendRedirect(websiteHead + "/pages/userLogin.html");
+        }
+        else {
             filterChain.doFilter(servletRequest, servletResponse);
             return;
         }
