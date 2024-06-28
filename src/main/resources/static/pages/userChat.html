@@ -144,9 +144,6 @@
                     this.userId=response.data.data.id;
                     this.username = response.data.data.name
                     this.initWebSocket();
-                    if(localStorage.getItem("chatFriendId")>0) {
-                        this.selectFriend(this.friends.find(item => item.friendId === Number(localStorage.getItem("chatFriendId"))));
-                    }
                 }
                 if (response.data.code == 0) {
                     this.selectFriend()
