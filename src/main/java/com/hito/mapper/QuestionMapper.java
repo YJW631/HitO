@@ -38,7 +38,7 @@ public interface QuestionMapper {
     @Select("select * from question where status=1 order by view_count desc limit 0,5;")
     List<Question> findAllHotQuestion();
 
-    @Select("select * from question where title regexp #{searchText};")
+    @Select("select * from question where title regexp #{searchText} order by create_time desc;")
     List<Question> findAllSearchQuestion(String searchText);
 
     @Update("update question set comment_count=comment_count+1 where id=#{ascription};")

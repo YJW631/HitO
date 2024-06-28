@@ -98,8 +98,6 @@
                             <h4 class="media-heading clickable" @click="toQuestion(item.id)">{{item.title}}</h4>
                             <span class="clickable" @click="toQuestion(item.id)">{{item.description}}</span><br>
                             <span class="text-desc">{{item.commentCount}} 个回复 • {{item.viewCount}} 次浏览 • {{item.likeCount}} 个赞 • {{item.user.name}}发布于{{item.createTime}}</span>
-                            <a class="text-desc" v-if="item.creator === username" href="javascript:void(0);"
-                               @click.prevent="deleteQuestion(item.id)"> 删除</a>
                         </div>
                     </div>
                     <el-pagination
@@ -154,16 +152,13 @@
             isFriend:0,
         },
         created: function () {
-
-
             this.getOriginUserInfo();
+            this.isFriendCheck();
             this.getHotQuestionList();
             this.getUserInfoBySession().then(()=>{
                 this.getMyQuestionNumber(this.username);
                 this.getMyQuestionList(this.currentPageNumber, this.size,this.username);
             })
-            // this.isFriendCheck();
-
         },
         methods: {
             isFriendCheck() {
