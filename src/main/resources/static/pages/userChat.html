@@ -334,7 +334,7 @@
 
                 if (window.WebSocket) {
 
-                    this.webSocket = new WebSocket("ws://localhost:8083/imserver/" + this.username);
+                    this.webSocket = new WebSocket("ws://101.201.107.15:8083/imserver/" + this.username);
                     this.webSocket.onopen = () => {
                         console.log('WebSocket 连接成功');
                     };
