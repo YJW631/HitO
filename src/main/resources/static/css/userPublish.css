@@ -1,13 +1,13 @@
-body{
+body {
     background-color: #efefef;
 }
 
-.main{
-    margin:30px;
+.main {
+    margin: 30px;
     background-color: white;
 }
 
-.btn-publish{
+.btn-publish {
     float: right;
     margin-bottom: 15px;
 }

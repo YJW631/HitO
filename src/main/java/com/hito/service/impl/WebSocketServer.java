@@ -1,6 +1,5 @@
 package com.hito.service.impl;
 
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.hito.mapper.ChatRecordsMapper;
@@ -18,7 +17,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 /**
  * @author websocket服务
  */
@@ -26,10 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class WebSocketServer {
     private static final Logger log = LoggerFactory.getLogger(WebSocketServer.class);
-    /**
-     * 记录当前在线连接数
-     */
     public static final Map<String, Session> sessionMap = new ConcurrentHashMap<>();
+
     /**
      * 连接建立成功调用的方法
      */
@@ -43,12 +39,10 @@ public class WebSocketServer {
         for (Object key : sessionMap.keySet()) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("username", key);
-            // {"username", "zhang", "username": "admin"}
             array.add(jsonObject);
         }
-//        {"users": [{"username": "zhang"},{ "username": "admin"}]}
-//        sendAllMessage(JSONObject.toJSONString(result));  // 后台发送消息给所有的客户端
     }
+
     /**
      * 连接关闭调用的方法
      */
@@ -58,27 +52,28 @@ public class WebSocketServer {
         log.info("有一连接关闭，移除username={}的用户session, 当前在线人数为：{}", username, sessionMap.size());
     }
 
-
     private static ChatRecordsMapper chatRecordsMapper;
+
     @Autowired
     public void setChatRecordsMapper(ChatRecordsMapper chatRecordMapper) {
         WebSocketServer.chatRecordsMapper = chatRecordMapper;
     }
+
     /**
      * 收到客户端消息后调用的方法
      * 后台收到客户端发送过来的消息
      * onMessage 是一个消息的中转站
      * 接受 浏览器端 socket.send 发送过来的 json数据
+     *
      * @param message 客户端发送过来的消息
      */
     @OnMessage
     public void onMessage(String message, Session session, @PathParam("username") String username) {
         log.info("服务端收到用户username={}的消息:{}", username, message);
         JSONObject obj = JSONObject.parseObject(message);
-        String toUsername = obj.getString("sendTo"); // to表示发送给哪个用户，比如 admin
-        String text = obj.getString("text"); // 发送的消息文本  hello
-        // {"to": "admin", "text": "聊天文本"}
-        Session toSession = sessionMap.get(toUsername); // 根据 to用户名来获取 session，再通过session发送消息文本
+        String toUsername = obj.getString("sendTo"); // to表示发送给哪个用户
+        String text = obj.getString("text"); // 发送的消息文本
+        Session toSession = sessionMap.get(toUsername); // 根据to用户名来获取session，再通过session发送消息文本
         ChatRecords chatRecords = new ChatRecords();
         chatRecords.setMessage(text);
         chatRecords.setFromBy(username);
@@ -89,11 +84,9 @@ public class WebSocketServer {
         chatRecords.setSentAt(formattedDate);
         chatRecordsMapper.insert(chatRecords);
         if (toSession != null) {
-            // 服务器端 再把消息组装一下，组装后的消息包含发送人和发送的文本内容
-            // {"from": "zhang", "text": "hello"}
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("from", username);  // from 是 zhang
-            jsonObject.put("text", text);  // text 同上面的text
+            jsonObject.put("from", username);
+            jsonObject.put("text", text);
 
             jsonObject.put("sentAt", formattedDate);
             this.sendMessage(jsonObject.toString(), toSession);
@@ -102,11 +95,16 @@ public class WebSocketServer {
             log.info("发送失败，未找到用户username={}的session", toUsername);
         }
     }
+
+    /**
+     * 发生错误
+     */
     @OnError
     public void onError(Session session, Throwable error) {
         log.error("发生错误");
         error.printStackTrace();
     }
+
     /**
      * 服务端发送消息给客户端
      */
@@ -118,6 +116,7 @@ public class WebSocketServer {
             log.error("服务端发送消息给客户端失败", e);
         }
     }
+
     /**
      * 服务端发送消息给所有客户端
      */

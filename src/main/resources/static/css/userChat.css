@@ -1,0 +1,56 @@
+.chat-panel {
+    background-color: #f9f9f9; /* 聊天框背景色 */
+    max-height: 400px;
+    height: 400px;
+    overflow-y: auto;
+    padding: 8px;
+    border: 1px solid #eee;
+    margin-bottom: 10px;
+}
+
+.message-item {
+    margin-bottom: 8px;
+    padding: 8px;
+    background-color: white; /* 消息内容背景色 */
+    border-radius: 4px; /* 圆角边框 */
+}
+
+.message-content {
+    display: flex;
+    align-items: flex-start;
+}
+
+.message-time {
+    color: #999; /* 时间字段颜色 */
+    margin-right: 10px; /* 时间字段与消息内容的间隔 */
+    font-size: 0.85em; /* 时间字段字体大小 */
+}
+
+.message-text {
+    margin-left: 8px;
+    word-wrap: break-word; /* 允许在单词边界处换行 */
+    white-space: pre-wrap; /* 保留空白和换行符，同时允许自动换行 */
+}
+
+.el-header {
+    padding: 0;
+    background-color: #b3c0d1;
+    line-height: 3;
+    text-align: center;
+}
+
+/* 消息发送者是自己的样式 */
+.my-message {
+    margin-left: auto; /* 靠右对齐 */
+    background-color: #e1f5fe; /* 例如：蓝色背景 */
+}
+
+/* 消息发送者是别人的样式 */
+.other-message {
+    background-color: #ffffff; /* 例如：白色背景 */
+}
+
+.el-footer {
+    text-align: right;
+    padding: 8px;
+}

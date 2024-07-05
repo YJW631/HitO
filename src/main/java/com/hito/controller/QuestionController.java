@@ -9,9 +9,6 @@ import com.hito.vo.Comment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.security.auth.message.callback.PrivateKeyCallback;
-import javax.servlet.ServletRequest;
-import javax.sound.sampled.AudioSystem;
 import java.util.List;
 import java.util.Map;
 
@@ -24,12 +21,18 @@ public class QuestionController {
     @Autowired
     private CommentService commentService;
 
+    /**
+     *获取问题id对应的问题对象以及相应的问题发布者的用户对象
+     * */
     @GetMapping("/user/questionbyid")
     public Result getQuestionList(@RequestParam(name = "id") Integer id) {
         QuestionDto questionDto = questionService.findQuestionById(id);
         return Result.success(questionDto);
     }
 
+    /**
+     *修改问题点赞数
+     * */
     @PutMapping("/user/like")
     public Result changeLike(@RequestBody Map<String, String> changeInfo) {
         Integer id = Integer.valueOf(changeInfo.get("id"));
@@ -38,6 +41,9 @@ public class QuestionController {
         return Result.success();
     }
 
+    /**
+     *发表评论
+     * */
     @PostMapping("/user/comment")
     public Result comment(@RequestBody Comment comment) {
         commentService.addComment(comment);
@@ -45,6 +51,9 @@ public class QuestionController {
         return Result.success();
     }
 
+    /**
+     *获取评论列表
+     * */
     @GetMapping("/user/commentlist")
     public Result getCommentList(@RequestParam(name = "ascription") Integer ascription,
                                  @RequestParam(name = "pageNumber", defaultValue = "1") Integer pageNumber,
@@ -53,11 +62,17 @@ public class QuestionController {
         return Result.success(commentDtoList);
     }
 
+    /**
+     *获取评论总数
+     * */
     @GetMapping("/user/commentnumber")
     public Result getCommentNumber(@RequestParam(name = "ascription") Integer ascription) {
         return Result.success(commentService.getCommentNumber(ascription));
     }
 
+    /**
+     *修改评论点赞数
+     * */
     @PutMapping("/user/commentlike")
     public Result changeCommentLike(@RequestBody Map<String, String> changeInfo) {
         Integer id = Integer.valueOf(changeInfo.get("id"));
@@ -66,12 +81,18 @@ public class QuestionController {
         return Result.success();
     }
 
+    /**
+     *根据问题id删除问题
+     * */
     @DeleteMapping("/user/delete")
     public Result deleteById(@RequestParam(name = "id") Integer id) {
         questionService.deleteById(id);
         return Result.success("删除成功");
     }
 
+    /**
+     *根据评论id删除评论
+     * */
     @DeleteMapping("/user/deletecomment")
     public Result deleteCommentById(@RequestParam(name = "id") Integer id,
                                     @RequestParam(name = "qid") Integer qid) {
@@ -79,6 +100,4 @@ public class QuestionController {
         commentService.deleteById(id);
         return Result.success("删除成功");
     }
-
-
 }

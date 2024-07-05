@@ -28,12 +28,11 @@
                 <h3 class="form-title">注册</h3>
                 <div class="col-sm-9 col-md-9">
                     <div class="form-group">
-                        <!--        用户名图标和用户名输入框            -->
+                        <!--        用户名输入框            -->
                         <i class="fa fa-user" aria-hidden="true"></i>
                         <input class="form-control required" type="text" name="username" id="username"
                                placeholder="请输入用户名" required v-model="newUser.username">
                     </div>
-
                     <!--           密码                -->
                     <div class="form-group">
                         <i class="fa fa-key" aria-hidden="true"></i>
@@ -76,14 +75,12 @@
                             </el-option>
                         </el-select>
                     </div>
-
                     <div class="form-group" v-if="newUser.avatarUrl!=''">
                         <i class="fa fa-envelope" aria-hidden="true"></i>
                         <img :src="newUser.avatarUrl" alt="Avatar Preview"
                              style="width: 50px; height: 50px; margin-left: 0px;">
                         <input type="button" value="重新选择" class="btn btn-warning" @click="newUser.avatarUrl=''">
                     </div>
-
                     <!--        邮箱                -->
                     <div class="form-group">
                         <i class="fa fa-envelope" aria-hidden="true"></i>
@@ -91,7 +88,6 @@
                                placeholder="请输入邮箱"
                                required v-model="newUser.email">
                     </div>
-
                     <!--        个人信息                -->
                     <div class="form-group">
                         <i class="fa fa-envelope" aria-hidden="true"></i>
@@ -99,18 +95,14 @@
                                placeholder="请输入个人介绍"
                                required v-model="newUser.selfIntroduction">
                     </div>
-
                     <div class="form-group">
                     </div>
-
                     <!--注册按钮-->
                     <div class="form-group">
                         <input type="submit" value="注册" class="btn btn-success pull-right">
                         <input type="button" @click.prevent="toLogin" class="btn btn-info pull-left" id="back_btn"
                                value="返回"/>
                     </div>
-
-
                 </div>
             </form>
         </div>
@@ -136,21 +128,21 @@
                 "https://ts1.cn.mm.bing.net/th/id/R-C.eff415e9e225102b7947f9694c567a67?rik=j20trlqI3C9qCg&riu=http%3a%2f%2fimg.qjsmartech.com%2fTopic%2fImages%2f2022-07%2f2022072515282812784.jpg&ehk=SJh8KV0RUZ9HZzgvMf6NJQp4Ul4e5Eq2Vqo5nBmNTlM%3d&risl=&pid=ImgRaw&r=0"
             ],
             showAvatarSelection: false,
-            hash1:''
+            hash1: ''
         },
         methods: {
-            toLogin() {
+            toLogin() {//跳转到登录页面
                 window.location.href = "userLogin.html";
             },
-            async register() {
+            async register() {//注册
                 if (this.newUser.password !== this.resetpw) {
                     alert("两次输入的密码不一致！");
                     this.newUser.password = '';
                     this.resetpw = '';
                     return;
                 }
-                this.hash1=md5(this.newUser.username+this.newUser.password);
-                this.newUser.password=this.hash1;
+                this.hash1 = md5(this.newUser.username + this.newUser.password);
+                this.newUser.password = this.hash1;
                 try {
                     const resp = await axios.post('/register', JSON.stringify(this.newUser), {
                         headers: {
@@ -162,13 +154,13 @@
                         window.location.href = "userLogin.html";
                     } else {
                         alert(resp.data.msg);
-                        this.newUser.username='';
+                        this.newUser.username = '';
                     }
                 } catch (error) {
                     console.error('注册失败', error);
                 }
             },
-            changeSelection(val) {
+            changeSelection(val) {//改变头像选择
                 for (let index in this.avatarUrlList) {
                     let obj = this.avatarUrlList[index]
                     if (obj.text == val) {

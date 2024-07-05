@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <title>问题管理</title>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8">
@@ -59,7 +59,8 @@
                         <el-main>
                             <form class="navbar-form navbar-left" @submit.prevent="searchQuestion">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="按内容搜索问题" v-model="searchText">
+                                    <input type="text" class="form-control" placeholder="按内容搜索问题"
+                                           v-model="searchText">
                                 </div>
                                 <button type="submit" class="btn btn-default">搜索</button>
                             </form>
@@ -130,7 +131,7 @@
             size: 10,
             total: 0,
             questionDtoList: [],
-            searchText:'',
+            searchText: '',
             showPageSelection: true
         },
         created: function () {
@@ -139,7 +140,7 @@
             this.getQuestionDtoList(this.currentPageNumber, this.size);
         },
         methods: {
-            async getNameBySession() {
+            async getNameBySession() {//根据session获取当前登录的管理员的名字
                 try {
                     const resp = await axios.get('/administrator/get/name'
                     );
@@ -152,15 +153,15 @@
                     console.error('获取失败', error);
                 }
             },
-            handleSizeChange(newSize) {
+            handleSizeChange(newSize) {//分页模块页面大小变化重新请求数据
                 this.size = newSize;
                 this.getQuestionDtoList(this.currentPageNumber, this.size);
             },
-            handleCurrentChange(newPage) {
+            handleCurrentChange(newPage) {//分页模块页号变化重新请求数据
                 this.currentPageNumber = newPage;
                 this.getQuestionDtoList(this.currentPageNumber, this.size);
             },
-            async getQuestionNumber() {
+            async getQuestionNumber() {//获取当前的问题总数（显示在分页模块）
                 try {
                     const resp = await axios.get('/administrator/questionnumber');
                     if (resp.data.code == 1) {
@@ -172,13 +173,13 @@
                     console.error('获取失败', error);
                 }
             },
-            toAdministratorIndex() {
+            toAdministratorIndex() {//跳转到用户管理页面
                 window.location.href = "administratorIndex.html";
             },
-            toAdministratorQuestion() {
+            toAdministratorQuestion() {//跳转到问题管理页面
                 window.location.href = "administratorQuestion.html";
             },
-            async getQuestionDtoList(pageNumber, pageSize) {
+            async getQuestionDtoList(pageNumber, pageSize) {//按页号和页大小请求问题列表
                 try {
                     const resp = await axios.get('/administrator/questionlist', {
                         params: {
@@ -195,7 +196,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async logOut() {
+            async logOut() {//登出
                 try {
                     const resp = await axios.get('/administratorlogout');
                     if (resp.data.code == 1) {
@@ -207,7 +208,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async pass(id) {
+            async pass(id) {//问题审核通过（展示）
                 try {
                     const resp = await axios.delete('/administrator/pass', {
                         params: {
@@ -223,7 +224,7 @@
                     console.error('删除失败', error);
                 }
             },
-            async unPass(id) {
+            async unPass(id) {//问题不再展示
                 try {
                     const resp = await axios.delete('/administrator/unpass', {
                         params: {
@@ -239,16 +240,16 @@
                     console.error('删除失败', error);
                 }
             },
-            searchQuestion() {
+            searchQuestion() {//根据问题内容搜索问题
                 this.showPageSelection = false;
                 this.getQuestionNumberByContent(this.searchText);
-                this.getQuestionDtoListByContent(this.currentPageNumber, this.size,this.searchText);
+                this.getQuestionDtoListByContent(this.currentPageNumber, this.size, this.searchText);
             },
-            async getQuestionNumberByContent(content) {
+            async getQuestionNumberByContent(content) {//根据问题内容匹配（数据库模糊查询）到的问题数量
                 try {
-                    const resp = await axios.get('/administrator/questionnumberbycontent',{
-                        params:{
-                            content:content
+                    const resp = await axios.get('/administrator/questionnumberbycontent', {
+                        params: {
+                            content: content
                         }
                     });
                     if (resp.data.code == 1) {
@@ -260,11 +261,11 @@
                     console.error('获取失败', error);
                 }
             },
-            async getQuestionDtoListByContent(pageNumber, pageSize,content) {
+            async getQuestionDtoListByContent(pageNumber, pageSize, content) {//根据问题内容匹配（数据库模糊查询）到的问题列表
                 try {
                     const resp = await axios.get('/administrator/questionlistbycontent', {
                         params: {
-                            content:content
+                            content: content
                         }
                     });
                     if (resp.data.code == 1) {
@@ -276,8 +277,6 @@
                     console.error('获取失败', error);
                 }
             }
-
-
         }
     });
 </script>

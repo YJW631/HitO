@@ -5,77 +5,79 @@
 <mapper namespace="com.hito.mapper.FriendshipsMapper">
 
     <resultMap id="BaseResultMap" type="com.hito.vo.Friendships">
-            <id property="friendId" column="friend_id" jdbcType="INTEGER"/>
-            <id property="userId" column="user_id" jdbcType="INTEGER"/>
-            <result property="status" column="status" jdbcType="OTHER"/>
-            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+        <id property="friendId" column="friend_id" jdbcType="INTEGER"/>
+        <id property="userId" column="user_id" jdbcType="INTEGER"/>
+        <result property="status" column="status" jdbcType="OTHER"/>
+        <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        friend_id,user_id,status,
+        friend_id
+        ,user_id,status,
         created_at
     </sql>
 
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
-        <include refid="Base_Column_List" />
+        <include refid="Base_Column_List"/>
         from friendships
-        where  friend_id = #{friendId,jdbcType=INTEGER} AND user_id = #{userId,jdbcType=INTEGER} 
+        where friend_id = #{friendId,jdbcType=INTEGER} AND user_id = #{userId,jdbcType=INTEGER}
     </select>
-    <!--<select id="listByUserId" parameterType="java.lang.Long" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List" />
-        from friendships
-        where  friend_id = #{friendId,jdbcType=INTEGER} AND user_id = #{userId,jdbcType=INTEGER}
-    </select>-->
     <select id="selectAllByUserId" resultType="com.hito.vo.Friendships">
-        SELECT t1.*, t2.`name` AS username FROM friendships t1 JOIN `user` t2 WHERE t1.friend_id= t2.id
-         and   user_id = #{userId,jdbcType=INTEGER}
+        SELECT t1.*, t2.`name` AS username
+        FROM friendships t1
+                 JOIN `user` t2
+        WHERE t1.friend_id = t2.id
+          and user_id = #{userId,jdbcType=INTEGER}
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-        delete from friendships
-        where  friend_id = #{friendId,jdbcType=INTEGER} AND user_id = #{userId,jdbcType=INTEGER} 
+        delete
+        from friendships
+        where friend_id = #{friendId,jdbcType=INTEGER}
+          AND user_id = #{userId,jdbcType=INTEGER}
     </delete>
     <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.hito.vo.Friendships" useGeneratedKeys="true">
         insert into friendships
-        ( friend_id,user_id,initiator,status
-        ,created_at)
-        values (#{friendId,jdbcType=INTEGER},#{userId,jdbcType=INTEGER},#{initiator,jdbcType=INTEGER},#{status,jdbcType=OTHER}
-        ,#{createdAt,jdbcType=TIMESTAMP})
+        ( friend_id, user_id, initiator, status
+        , created_at)
+        values ( #{friendId,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{initiator,jdbcType=INTEGER}
+               , #{status,jdbcType=OTHER}
+               , #{createdAt,jdbcType=TIMESTAMP})
     </insert>
-    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.hito.vo.Friendships" useGeneratedKeys="true">
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.hito.vo.Friendships"
+            useGeneratedKeys="true">
         insert into friendships
         <trim prefix="(" suffix=")" suffixOverrides=",">
-                <if test="friendId != null">friend_id,</if>
-                <if test="userId != null">user_id,</if>
-                <if test="status != null">status,</if>
-                <if test="createdAt != null">created_at,</if>
+            <if test="friendId != null">friend_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="status != null">status,</if>
+            <if test="createdAt != null">created_at,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
-                <if test="friendId != null"> #{friendId,jdbcType=INTEGER},</if>
-                <if test="userId != null"> #{userId,jdbcType=INTEGER},</if>
-                <if test="status != null"> #{status,jdbcType=OTHER},</if>
-                <if test="createdAt != null"> #{createdAt,jdbcType=TIMESTAMP},</if>
+            <if test="friendId != null">#{friendId,jdbcType=INTEGER},</if>
+            <if test="userId != null">#{userId,jdbcType=INTEGER},</if>
+            <if test="status != null">#{status,jdbcType=OTHER},</if>
+            <if test="createdAt != null">#{createdAt,jdbcType=TIMESTAMP},</if>
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.hito.vo.Friendships">
         update friendships
         <set>
-                <if test="status != null">
-                    status = #{status,jdbcType=OTHER},
-                </if>
-                <if test="createdAt != null">
-                    created_at = #{createdAt,jdbcType=TIMESTAMP},
-                </if>
+            <if test="status != null">
+                status = #{status,jdbcType=OTHER},
+            </if>
+            <if test="createdAt != null">
+                created_at = #{createdAt,jdbcType=TIMESTAMP},
+            </if>
         </set>
-        where   friend_id = #{friendId,jdbcType=INTEGER} AND user_id = #{userId,jdbcType=INTEGER} 
+        where friend_id = #{friendId,jdbcType=INTEGER} AND user_id = #{userId,jdbcType=INTEGER}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.hito.vo.Friendships">
         update friendships
-        set 
-            status =  #{status,jdbcType=OTHER},
-            created_at =  #{createdAt,jdbcType=TIMESTAMP}
-        where   friend_id = #{friendId,jdbcType=INTEGER} AND user_id = #{userId,jdbcType=INTEGER} 
+        set status     = #{status,jdbcType=OTHER},
+            created_at = #{createdAt,jdbcType=TIMESTAMP}
+        where friend_id = #{friendId,jdbcType=INTEGER}
+          AND user_id = #{userId,jdbcType=INTEGER}
     </update>
 </mapper>

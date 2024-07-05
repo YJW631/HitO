@@ -79,7 +79,9 @@
                 <el-button @click="addFriend" v-if="isFriend != '1'&&this.userInfo.id!=this.originUserInfo.id">
                     添加好友
                 </el-button>
-                <el-button @click="deleteFriend" type="danger" plain v-if="isFriend === '1'&&this.userInfo.id!=this.originUserInfo.id">删除好友</el-button>
+                <el-button @click="deleteFriend" type="danger" plain
+                           v-if="isFriend === '1'&&this.userInfo.id!=this.originUserInfo.id">删除好友
+                </el-button>
                 <hr>
                 <div v-if="isFriend == '1'">
                     <h3>好友帖子</h3>
@@ -137,7 +139,7 @@
     new Vue({
         el: '#app',
         data: {
-            username:'',
+            username: '',
             userInfo: {},
             hotQuestionList: [],
             originUserInfo: {},
@@ -149,24 +151,24 @@
             username: '',
             showPageSelection: true,
             tagInSession: '',
-            isFriend:0,
+            isFriend: 0,
         },
         created: function () {
             this.getOriginUserInfo();
             this.isFriendCheck();
             this.getHotQuestionList();
-            this.getUserInfoBySession().then(()=>{
+            this.getUserInfoBySession().then(() => {
                 this.getMyQuestionNumber(this.username);
-                this.getMyQuestionList(this.currentPageNumber, this.size,this.username);
+                this.getMyQuestionList(this.currentPageNumber, this.size, this.username);
             })
         },
         methods: {
-            isFriendCheck() {
-                const resp =  axios.get('/friends/get', {
+            isFriendCheck() {//检查是否为当前登录用户的好友
+                const resp = axios.get('/friends/get', {
                     params: {
-                        friendId:  this.userInfo.id,
-                        userId:this.originUserInfo.id,
-                        status:"accepted"
+                        friendId: this.userInfo.id,
+                        userId: this.originUserInfo.id,
+                        status: "accepted"
                     }
                 }).then(response => {
                     if (response.data.code == 1) {
@@ -177,19 +179,17 @@
                     }
                 })
             },
-
-            addFriend() {
+            addFriend() {//添加好友
                 this.$confirm('确定添加为好友?', '发送好友请求', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    // 请求添加好友接口
                     try {
-                        const resp =  axios.get('/friends/addRequest', {
+                        const resp = axios.get('/friends/addRequest', {// 请求添加好友接口
                             params: {
-                                friendId:  this.userInfo.id,
-                                userId:this.originUserInfo.id
+                                friendId: this.userInfo.id,
+                                userId: this.originUserInfo.id
                             }
                         }).then(response => {
                             if (response.data.code == 1) {
@@ -208,12 +208,9 @@
                             .catch(error => {
                                 console.error(error);
                             });
-
-
                     } catch (error) {
                         console.error('获取失败', error);
                     }
-
                 }).catch(() => {
                     this.$message({
                         type: 'info',
@@ -221,10 +218,10 @@
                     });
                 });
             },
-            toFriendList(){
+            toFriendList() {//跳转到聊天页面
                 window.location.href = "userChat.html";
             },
-            async getMyQuestionList(pageNumber, pageSize, username) {
+            async getMyQuestionList(pageNumber, pageSize, username) {//获取当前页面对应用户的问题列表
                 try {
                     const resp = await axios.get('/user/myquestionlist', {
                         params: {
@@ -242,15 +239,15 @@
                     console.error('获取失败', error);
                 }
             },
-            handleSizeChange(newSize) {
+            handleSizeChange(newSize) {//分页模块页面大小变化重新请求数据
                 this.size = newSize;
                 this.getMyQuestionList(this.currentPageNumber, this.size, this.username);
             },
-            handleCurrentChange(newPage) {
+            handleCurrentChange(newPage) {//分页模块页面号变化重新请求数据
                 this.currentPageNumber = newPage;
                 this.getMyQuestionList(this.currentPageNumber, this.size, this.username);
             },
-            async getMyQuestionNumber(username) {
+            async getMyQuestionNumber(username) {//获取当前页面对应用户的问题总数
                 this.isFriendCheck();
                 try {
                     const resp = await axios.get('/user/myquestionnumber', {
@@ -267,9 +264,7 @@
                     console.error('获取失败', error);
                 }
             },
-
-
-            async getUserInfoBySession() {
+            async getUserInfoBySession() {//根据session获取当前登录用户的个人信息
                 let from = localStorage.getItem("from");
                 try {
                     const resp = await axios.get('/user/get/userinfo', {
@@ -288,13 +283,13 @@
                     console.error('获取失败', error);
                 }
             },
-            toProfile() {
+            toProfile() {//跳转到我的问题页面
                 window.location.href = "userProfile.html";
             },
-            toIndex() {
+            toIndex() {//跳转到用户主页
                 window.location.href = "userIndex.html";
             },
-            async getHotQuestionList() {
+            async getHotQuestionList() {//获取当前热门话题列表
                 try {
                     const resp = await axios.get('/user/hotquestionlist', {});
                     if (resp.data.code == 1) {
@@ -306,7 +301,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async logOut() {
+            async logOut() {//登出
                 try {
                     const resp = await axios.get('/userlogout');
                     if (resp.data.code == 1) {
@@ -318,11 +313,11 @@
                     console.error('获取失败', error);
                 }
             },
-            toUserInfo() {
+            toUserInfo() {//跳转到用户个人信息页面
                 localStorage.setItem("from", '0');
                 window.location.href = "userInfo.html";
             },
-            async imgToUserInfo(user) {
+            async imgToUserInfo(user) {//跳转到头像对应用户的个人信息页面
                 try {
                     const resp = await axios.put('/user/setuserinfo', JSON.stringify(user), {
                         headers: {
@@ -339,7 +334,7 @@
                     console.error('跳转失败', error);
                 }
             },
-            async getOriginUserInfo() {
+            async getOriginUserInfo() {//获取当前登录用户的个人信息
                 try {
                     const resp = await axios.get('/user/get/userinfo', {
                         params: {
@@ -355,29 +350,29 @@
                     console.error('获取失败', error);
                 }
             },
-            toFriend(){
+            toFriend() {//跳转到我的好友页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userFriend.html";
+                window.location.href = "userFriend.html";
             },
-            toChat(){
+            toChat() {//跳转到聊天页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userChat.html";
+                window.location.href = "userChat.html";
             },
-            toUserChange(){
+            toUserChange() {//跳转到修改密码页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userChange.html";
+                window.location.href = "userChange.html";
             },
-            async deleteFriend(userId,friendId) {
+            async deleteFriend(userId, friendId) {//删除好友
                 try {
                     const resp = await axios.delete('/friends/deletefriend', {
                         params: {
-                            id1:this.originUserInfo.id,
-                            id2:this.userInfo.id
+                            id1: this.originUserInfo.id,
+                            id2: this.userInfo.id
                         }
                     });
                     if (resp.data.code == 1) {
                         alert("删除成功");
-                        window.location.href="userInfo.html";
+                        window.location.href = "userInfo.html";
                     } else {
                         alert("删除失败")
                     }
@@ -385,7 +380,7 @@
                     console.error('删除失败', error);
                 }
             },
-            async toQuestion(id) {
+            async toQuestion(id) {//跳转到id问题对应的详情页面
                 let viewChangeInfo = {
                     id: id
                 }
@@ -404,7 +399,6 @@
                 } catch (error) {
                     console.error('修改失败', error);
                 }
-
             }
         }
     });

@@ -19,14 +19,17 @@ public class FriendServiceImpl implements FriendService {
     @Autowired
     private UserMapper userMapper;
 
+    /**
+     * 查询id对应用户的所用好友的用户信息
+     */
     @Override
     public List<User> getFriendList(Integer id) {
-        List<Integer> friendIdList=friendshipsMapper.selectIdById(id);
-        List<User> friendList=new ArrayList<>();
-        User friend=new User();
+        List<Integer> friendIdList = friendshipsMapper.selectIdById(id);
+        List<User> friendList = new ArrayList<>();
+        User friend = new User();
         for (int i = 0; i < friendIdList.size(); i++) {
-            friend=userMapper.selectById(friendIdList.get(i));
-            if(friend!=null){
+            friend = userMapper.selectById(friendIdList.get(i));
+            if (friend != null) {
                 friendList.add(friend);
             }
         }

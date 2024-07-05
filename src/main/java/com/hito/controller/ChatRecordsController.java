@@ -15,6 +15,9 @@ public class ChatRecordsController {
     @Autowired
     private ChatRecordsMapper chatRecordsMapper;
 
+    /**
+     * 获取聊天记录
+     */
     @RequestMapping("list")
     public Result list(String from, String sendTo) {
         List<ChatRecords> chatRecords =

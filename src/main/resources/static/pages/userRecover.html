@@ -1,127 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>找回密码</title>
-  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
-  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css"
-        integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap-theme.min.css"
-        integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
-  <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"
-          integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
-          crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <link rel="stylesheet" href="/css/userRegister.css">
-  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
-  <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>找回密码</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css"
+          integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap-theme.min.css"
+          integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"
+            integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+            crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/css/userRegister.css">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script>
 </head>
 <body>
 <div id="app">
-  <div class="container">
-    <h1 style="color: aliceblue;text-align: center;font-size: 40px;font-family: sans-serif;">工大圈子</h1>
-    <div class="form row">
-      <form class="form-horizontal col-sm-offset col-md-offset-3" @submit.prevent="recover">
-        <h3 class="form-title">找回密码</h3>
-        <div class="col-sm-9 col-md-9">
-          <div class="form-group">
-            <!--        用户名图标和用户名输入框            -->
-            <i class="fa fa-user" aria-hidden="true"></i>
-            <input class="form-control required" type="text" name="username" id="username"
-                   placeholder="请输入用户名" required v-model="userRecover.username">
-          </div>
-
-          <!--        姓名                -->
-          <div class="form-group">
-            <i class="fa fa-envelope" aria-hidden="true"></i>
-            <input class="form-control required" type="text" name="name" id="name" placeholder="请输入姓名"
-                   required v-model="userRecover.name">
-          </div>
-
-          <!--        邮箱                -->
-          <div class="form-group">
-            <i class="fa fa-envelope" aria-hidden="true"></i>
-            <input class="form-control required" type="email" name="email" id="email"
-                   placeholder="请输入邮箱"
-                   required v-model="userRecover.email">
-          </div>
-
-          <!--           密码                -->
-          <div class="form-group">
-            <i class="fa fa-key" aria-hidden="true"></i>
-            <input class="form-control required" type="password" name="password" id="password"
-                   placeholder="请输入新密码" required v-model="userRecover.password">
-          </div>
-          <!--          确认密码              -->
-          <div class="form-group">
-            <i class="fa fa-check-circle-o" aria-hidden="true"></i>
-            <input class="form-control required" type="password" name="resetpw" id="resetpw"
-                   placeholder="请确认密码" required v-model="resetpw">
-          </div>
-
-          <!--找回按钮-->
-          <div class="form-group">
-            <input type="submit" value="找回密码" class="btn btn-success pull-right">
-            <input type="button" @click.prevent="toLogin" class="btn btn-info pull-left" id="back_btn"
-                   value="返回"/>
-          </div>
-
-
+    <div class="container">
+        <h1 style="color: aliceblue;text-align: center;font-size: 40px;font-family: sans-serif;">工大圈子</h1>
+        <div class="form row">
+            <form class="form-horizontal col-sm-offset col-md-offset-3" @submit.prevent="recover">
+                <h3 class="form-title">找回密码</h3>
+                <div class="col-sm-9 col-md-9">
+                    <div class="form-group">
+                        <!--        用户名输入框            -->
+                        <i class="fa fa-user" aria-hidden="true"></i>
+                        <input class="form-control required" type="text" name="username" id="username"
+                               placeholder="请输入用户名" required v-model="userRecover.username">
+                    </div>
+                    <!--        姓名                -->
+                    <div class="form-group">
+                        <i class="fa fa-envelope" aria-hidden="true"></i>
+                        <input class="form-control required" type="text" name="name" id="name" placeholder="请输入姓名"
+                               required v-model="userRecover.name">
+                    </div>
+                    <!--        邮箱                -->
+                    <div class="form-group">
+                        <i class="fa fa-envelope" aria-hidden="true"></i>
+                        <input class="form-control required" type="email" name="email" id="email"
+                               placeholder="请输入邮箱"
+                               required v-model="userRecover.email">
+                    </div>
+                    <!--           密码                -->
+                    <div class="form-group">
+                        <i class="fa fa-key" aria-hidden="true"></i>
+                        <input class="form-control required" type="password" name="password" id="password"
+                               placeholder="请输入新密码" required v-model="userRecover.password">
+                    </div>
+                    <!--          确认密码              -->
+                    <div class="form-group">
+                        <i class="fa fa-check-circle-o" aria-hidden="true"></i>
+                        <input class="form-control required" type="password" name="resetpw" id="resetpw"
+                               placeholder="请确认密码" required v-model="resetpw">
+                    </div>
+                    <!--找回按钮-->
+                    <div class="form-group">
+                        <input type="submit" value="找回密码" class="btn btn-success pull-right">
+                        <input type="button" @click.prevent="toLogin" class="btn btn-info pull-left" id="back_btn"
+                               value="返回"/>
+                    </div>
+                </div>
+            </form>
         </div>
-      </form>
     </div>
-  </div>
 </div>
 <script>
-  new Vue({
-    el: '#app',
-    data: {
-      userRecover: {
-        username: '',
-        password: '',
-        name: '',
-        email: ''
-      },
-      resetpw: '',
-      showAvatarSelection: false,
-      hash1:''
-    },
-    methods: {
-      toLogin() {
-        window.location.href = "userLogin.html";
-      },
-      async recover() {
-        if (this.userRecover.password !== this.resetpw) {
-          alert("两次输入的密码不一致！");
-          this.userRecover.password = '';
-          this.resetpw = '';
-          return;
-        }
-        this.hash1=md5(this.userRecover.username+this.userRecover.password);
-        this.userRecover.password=this.hash1;
-        try {
-          const resp = await axios.post('/recover', JSON.stringify(this.userRecover), {
-            headers: {
-              'Content-Type': 'application/json'
+    new Vue({
+        el: '#app',
+        data: {
+            userRecover: {
+                username: '',
+                password: '',
+                name: '',
+                email: ''
+            },
+            resetpw: '',
+            showAvatarSelection: false,
+            hash1: ''
+        },
+        methods: {
+            toLogin() {//跳转到登录页面
+                window.location.href = "userLogin.html";
+            },
+            async recover() {//找回密码
+                if (this.userRecover.password !== this.resetpw) {
+                    alert("两次输入的密码不一致！");
+                    this.userRecover.password = '';
+                    this.resetpw = '';
+                    return;
+                }
+                this.hash1 = md5(this.userRecover.username + this.userRecover.password);
+                this.userRecover.password = this.hash1;
+                try {
+                    const resp = await axios.post('/recover', JSON.stringify(this.userRecover), {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    if (resp.data.code == 1) {
+                        console.log("修改成功");
+                        window.location.href = "userLogin.html";
+                    } else {
+                        alert(resp.data.msg);
+                        this.userRecover = '';
+                        this.resetpw = '';
+                    }
+                } catch (error) {
+                    console.error('修改失败', error);
+                }
             }
-          });
-          if (resp.data.code == 1) {
-            console.log("修改成功");
-            window.location.href = "userLogin.html";
-          } else {
-            alert(resp.data.msg);
-            this.userRecover='';
-            this.resetpw='';
-          }
-        } catch (error) {
-          console.error('修改失败', error);
         }
-      }
-    }
-  });
+    });
 </script>
 </body>
 </html>

@@ -28,7 +28,6 @@
                 </button>
                 <a class="navbar-brand" href="#" @click="toIndex">HitO</a>
             </div>
-
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <form class="navbar-form navbar-left" @submit.prevent="searchQuestion">
                     <div class="form-group">
@@ -171,7 +170,7 @@
             this.tagInSession = localStorage.getItem("tag");
         },
         methods: {
-            async getNameBySession() {
+            async getNameBySession() {//根据session获取当前登录用户的名字
                 try {
                     const resp = await axios.get('/user/get/name'
                     );
@@ -184,7 +183,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async logOut() {
+            async logOut() {//登出
                 try {
                     const resp = await axios.get('/userlogout');
                     if (resp.data.code == 1) {
@@ -196,11 +195,11 @@
                     console.error('获取失败', error);
                 }
             },
-            toIndex() {
+            toIndex() {//跳转到用户主页
                 localStorage.setItem("tag", '0');
                 window.location.href = "userIndex.html";
             },
-            async getQuestionList(pageNumber, pageSize) {
+            async getQuestionList(pageNumber, pageSize) {//根据页面号和页面大小获取问题列表
                 let tag = localStorage.getItem("tag");
                 try {
                     const resp = await axios.get('/user/questionlist', {
@@ -219,15 +218,15 @@
                     console.error('获取失败', error);
                 }
             },
-            handleSizeChange(newSize) {
+            handleSizeChange(newSize) {//分页模块页面大小变化重新请求数据
                 this.size = newSize;
                 this.getQuestionList(this.currentPageNumber, this.size);
             },
-            handleCurrentChange(newPage) {
+            handleCurrentChange(newPage) {//分页模块页面号变化重新请求数据
                 this.currentPageNumber = newPage;
                 this.getQuestionList(this.currentPageNumber, this.size);
             },
-            async getQuestionNumber() {
+            async getQuestionNumber() {//获取当前问题总数
                 let tag = localStorage.getItem("tag");
                 try {
                     const resp = await axios.get('/user/questionnumber', {
@@ -244,11 +243,11 @@
                     console.error('获取失败', error);
                 }
             },
-            toProfile() {
+            toProfile() {//跳转到我的问题页面
                 localStorage.setItem("tag", '0');
                 window.location.href = "userProfile.html";
             },
-            async getUsernameBySession() {
+            async getUsernameBySession() {//根据session获取当前登录用户的用户名
                 try {
                     const resp = await axios.get('/user/get/username'
                     );
@@ -261,7 +260,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async deleteQuestion(id) {
+            async deleteQuestion(id) {//根据问题id删除问题
                 try {
                     const resp = await axios.delete('/user/delete', {
                         params: {
@@ -279,7 +278,7 @@
                     console.error('删除失败', error);
                 }
             },
-            async toQuestion(id) {
+            async toQuestion(id) {//前往id对应问题的详情界面
                 let viewChangeInfo = {
                     id: id
                 }
@@ -298,9 +297,8 @@
                 } catch (error) {
                     console.error('修改失败', error);
                 }
-
             },
-            async getHotQuestionList() {
+            async getHotQuestionList() {//获取当前热门话题列表
                 try {
                     const resp = await axios.get('/user/hotquestionlist');
                     if (resp.data.code == 1) {
@@ -312,7 +310,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async searchQuestion() {
+            async searchQuestion() {//根据问题标题搜索问题
                 try {
                     const resp = await axios.get('/user/searchQuestionlist', {
                         params: {
@@ -322,7 +320,7 @@
                     if (resp.data.code == 1) {
                         this.questionList = resp.data.data;
                         this.showPageSelection = false;
-                        localStorage.setItem("tag",'0');
+                        localStorage.setItem("tag", '0');
                         this.tagInSession = localStorage.getItem("tag");
                     } else {
                         console.log(resp.data.data)
@@ -331,20 +329,20 @@
                     console.error('获取失败', error);
                 }
             },
-            toUserInfo() {
+            toUserInfo() {//跳转到用户个人信息页面
                 localStorage.setItem("tag", '0');
                 localStorage.setItem("from", '0');
                 window.location.href = "userInfo.html";
             },
-            setTagSession(tag) {
+            setTagSession(tag) {//设置session记录所选的问题分类标签
                 localStorage.setItem("tag", tag);
                 window.location.href = "userIndex.html";
             },
-            toPublish() {
+            toPublish() {//跳转到发布问题页面
                 localStorage.setItem("tag", '0');
                 window.location.href = "userPublish.html";
             },
-            async imgToUserInfo(user) {
+            async imgToUserInfo(user) {//跳转到头像对应用户的个人信息页面
                 try {
                     const resp = await axios.put('/user/setuserinfo', JSON.stringify(user), {
                         headers: {
@@ -361,17 +359,17 @@
                     console.error('跳转失败', error);
                 }
             },
-            toUserChange(){
+            toUserChange() {//跳转到修改密码页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userChange.html";
+                window.location.href = "userChange.html";
             },
-            toFriend(){
+            toFriend() {//跳转到我的好友页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userFriend.html";
+                window.location.href = "userFriend.html";
             },
-            toChat(){
+            toChat() {//跳转到聊天页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userChat.html";
+                window.location.href = "userChat.html";
             }
         }
     });

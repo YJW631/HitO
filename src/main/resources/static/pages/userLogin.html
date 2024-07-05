@@ -63,7 +63,7 @@
             verificationCode: ''
         },
         methods: {
-            async login() {
+            async login() {//用户登录
                 this.hash1 = md5(this.username + this.password);
                 this.verificationCode = this.generateRandomCode();
                 this.hash2 = md5(this.hash1 + this.verificationCode);
@@ -89,20 +89,20 @@
                     console.error('登录失败', error);
                 }
             },
-            toRegister() {
+            toRegister() {//跳转到用户注册页面
                 window.location.href = "userRegister.html";
             },
-            toAdministratorLogin() {
+            toAdministratorLogin() {//跳转到管理员登录页面
                 window.location.href = "administratorLogin.html"
             },
-            generateRandomCode() {
+            generateRandomCode() {//产生八位随机数字串用于登录验证
                 let code = '';
                 for (let i = 0; i < 8; i++) {
                     code += Math.floor(Math.random() * 10);
                 }
                 return code;
             },
-            toRecover(){
+            toRecover(){//跳转到找回密码页面
                 window.location.href="userRecover.html";
             }
         }

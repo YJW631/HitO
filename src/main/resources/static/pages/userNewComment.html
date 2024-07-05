@@ -28,7 +28,6 @@
                 </button>
                 <a class="navbar-brand" href="#" @click="toIndex">HitO</a>
             </div>
-
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                     <li th:if="${session.user!=null}">
@@ -106,7 +105,7 @@
             })
         },
         methods: {
-            async getNameBySession() {
+            async getNameBySession() {//根据session获取当前登录的用户的名字
                 try {
                     const resp = await axios.get('/user/get/name'
                     );
@@ -119,7 +118,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async getUsernameBySession() {
+            async getUsernameBySession() {//根据session获取当前登录的用户的用户名
                 try {
                     const resp = await axios.get('/user/get/username'
                     );
@@ -132,7 +131,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async logOut() {
+            async logOut() {//登出
                 try {
                     const resp = await axios.get('/userlogout');
                     if (resp.data.code == 1) {
@@ -144,10 +143,10 @@
                     console.error('获取失败', error);
                 }
             },
-            toIndex() {
+            toIndex() {//跳转到用户主页
                 window.location.href = "userIndex.html";
             },
-            async getQuestionListWithNewComment(pageNumber, pageSize, username) {
+            async getQuestionListWithNewComment(pageNumber, pageSize, username) {//获取有最新评论的问题列表
                 try {
                     const resp = await axios.get('/user/myquestionlistwnc', {
                         params: {
@@ -165,15 +164,15 @@
                     console.error('获取失败', error);
                 }
             },
-            handleSizeChange(newSize) {
+            handleSizeChange(newSize) {//分页模块页面大小变化重新请求数据
                 this.size = newSize;
                 this.getQuestionListWithNewComment(this.currentPageNumber, this.size, this.username);
             },
-            handleCurrentChange(newPage) {
+            handleCurrentChange(newPage) {//分页模块页面号变化重新请求数据
                 this.currentPageNumber = newPage;
                 this.getQuestionListWithNewComment(this.currentPageNumber, this.size, this.username);
             },
-            async getQuestionNumberWithNewComment(username) {
+            async getQuestionNumberWithNewComment(username) {//获取有最新评论的问题数量
                 try {
                     const resp = await axios.get('/user/myquestionnumberwnc', {
                         params: {
@@ -189,13 +188,13 @@
                     console.error('获取失败', error);
                 }
             },
-            toProfile() {
+            toProfile() {//跳转到我的问题页面
                 window.location.href = "userProfile.html";
             },
-            newestComment() {
+            newestComment() {//跳转到最新评论页面
                 window.location.href = "userNewComment.html";
             },
-            async deleteQuestion(id) {
+            async deleteQuestion(id) {//删除id对应的问题
                 try {
                     const resp = await axios.delete('/user/delete', {
                         params: {
@@ -212,7 +211,7 @@
                     console.error('删除失败', error);
                 }
             },
-            async toQuestion(id) {
+            async toQuestion(id) {//跳转到id对应问题的详情页面
                 let viewChangeInfo = {
                     id: id
                 }
@@ -247,11 +246,11 @@
                 sessionStorage.setItem("qid", id);
                 window.location.href = "userQuestion.html";
             },
-            toUserInfo() {
+            toUserInfo() {//跳转到用户个人信息页面
                 localStorage.setItem("from", '0');
                 window.location.href = "userInfo.html";
             },
-            async imgToUserInfo(user) {
+            async imgToUserInfo(user) {//跳转到头像对应用户的个人信息页面
                 try {
                     const resp = await axios.put('/user/setuserinfo', JSON.stringify(user), {
                         headers: {
@@ -268,17 +267,17 @@
                     console.error('跳转失败', error);
                 }
             },
-            toUserChange(){
+            toUserChange() {//跳转到修改密码页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userChange.html";
+                window.location.href = "userChange.html";
             },
-            toFriend(){
+            toFriend() {//跳转到我的好友页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userFriend.html";
+                window.location.href = "userFriend.html";
             },
-            toChat(){
+            toChat() {//跳转到聊天页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userChat.html";
+                window.location.href = "userChat.html";
             }
         }
     });

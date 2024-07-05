@@ -28,7 +28,6 @@
                 </button>
                 <a class="navbar-brand" href="#" @click="toIndex">HitO</a>
             </div>
-
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                     <li th:if="${session.user!=null}">
@@ -115,7 +114,8 @@
                         <h4 class="media-heading clickable" @click="toQuestion(item.id)">{{item.title}}</h4>
                         <span class="clickable" @click="toQuestion(item.id)">{{item.description}}</span><br>
                         <span class="text-desc">{{item.commentCount}} 个回复 • {{item.viewCount}} 次浏览 • {{item.likeCount}} 个赞 • {{item.user.name}}发布于{{item.createTime}}</span>
-                        <a class="text-desc" v-if="item.creator === username" href="javascript:void(0);" @click.prevent="deleteQuestion(item.id)"> 删除</a>
+                        <a class="text-desc" v-if="item.creator === username" href="javascript:void(0);"
+                           @click.prevent="deleteQuestion(item.id)"> 删除</a>
                     </div>
                 </div>
             </div>
@@ -138,7 +138,7 @@
             size: 10,
             total: 0,
             showCommentLike: [],
-            hotQuestionList:[]
+            hotQuestionList: []
         },
         created: function () {
             this.getNameBySession();
@@ -161,7 +161,7 @@
             })
         },
         methods: {
-            async getNameBySession() {
+            async getNameBySession() {//根据session获取当前登录用户的名字
                 try {
                     const resp = await axios.get('/user/get/name'
                     );
@@ -174,7 +174,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async logOut() {
+            async logOut() {//登出
                 try {
                     const resp = await axios.get('/userlogout');
                     if (resp.data.code == 1) {
@@ -186,10 +186,10 @@
                     console.error('获取失败', error);
                 }
             },
-            toIndex() {
+            toIndex() {//跳转到用户主页
                 window.location.href = "userIndex.html";
             },
-            async getUsernameBySession() {
+            async getUsernameBySession() {//根据session获取当前登录用户的用户名
                 try {
                     const resp = await axios.get('/user/get/username'
                     );
@@ -202,7 +202,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async deleteQuestion(id) {
+            async deleteQuestion(id) {//删除id对应的问题
                 try {
                     const resp = await axios.delete('/user/delete', {
                         params: {
@@ -211,7 +211,7 @@
                     });
                     if (resp.data.code == 1) {
                         alert(resp.data.data);
-                        window.location.href="userIndex.html";
+                        window.location.href = "userIndex.html";
                     } else {
                         console.log(resp.data.msg);
                     }
@@ -219,10 +219,10 @@
                     console.error('删除失败', error);
                 }
             },
-            toProfile() {
+            toProfile() {//跳转到我的问题页面
                 window.location.href = "userProfile.html";
             },
-            async getQuestionById(id) {
+            async getQuestionById(id) {//根据问题id获取问题具体信息
                 try {
                     const resp = await axios.get('/user/questionbyid', {
                         params: {
@@ -239,7 +239,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async changeLike(id, likeCount) {
+            async changeLike(id, likeCount) {//改变问题点赞数
                 let likeChangeInfo = {
                     id: this.qid,
                     likeCount: likeCount
@@ -259,7 +259,7 @@
                     console.error('修改失败', error);
                 }
             },
-            addLike() {
+            addLike() {//点赞问题
                 this.changeLike(this.qid, this.questionDto.likeCount + 1);
                 sessionStorage.setItem(JSON.stringify({
                     username: this.username,
@@ -268,7 +268,7 @@
                 this.showLike = false;
                 location.href = "userQuestion.html";
             },
-            subLike() {
+            subLike() {//取消问题点赞
                 this.changeLike(this.qid, this.questionDto.likeCount - 1);
                 sessionStorage.setItem(JSON.stringify({
                     username: this.username,
@@ -277,7 +277,7 @@
                 this.showLike = true;
                 location.href = "userQuestion.html";
             },
-            async submitComment() {
+            async submitComment() {//提交评论
                 let comment = {
                     content: this.newComment,
                     creator: this.username,
@@ -299,7 +299,7 @@
                     console.error('评论失败', error);
                 }
             },
-            async getCommentList(id, pageNumber, pageSize) {
+            async getCommentList(id, pageNumber, pageSize) {//获取评论列表
                 try {
                     const resp = await axios.get('/user/commentlist', {
                         params: {
@@ -317,7 +317,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async getCommentNumber(id) {
+            async getCommentNumber(id) {//获取评论总数
                 try {
                     const resp = await axios.get('/user/commentnumber', {
                         params: {
@@ -333,15 +333,15 @@
                     console.error('获取失败', error);
                 }
             },
-            handleSizeChange(newSize) {
+            handleSizeChange(newSize) {//分页模块页面大小变化重新请求数据
                 this.size = newSize;
                 this.getCommentList(this.qid, this.currentPageNumber, this.size);
             },
-            handleCurrentChange(newPage) {
+            handleCurrentChange(newPage) {//分页模块页面号变化重新请求数据
                 this.currentPageNumber = newPage;
                 this.getCommentList(this.qid, this.currentPageNumber, this.size);
             },
-            async changeCommentLike(id, likeCommentCount) {
+            async changeCommentLike(id, likeCommentCount) {//改变评论点赞数
                 let likeChangeInfo = {
                     id: id,
                     likeCount: likeCommentCount
@@ -352,16 +352,11 @@
                             'Content-Type': 'application/json'
                         }
                     });
-                    if (resp.data.code == 1) {
-
-                    } else {
-
-                    }
                 } catch (error) {
                     console.error('修改失败', error);
                 }
             },
-            addCommentLike(index) {
+            addCommentLike(index) {//点赞评论
                 this.changeCommentLike(this.commentDtoList[index].id, this.commentDtoList[index].likeCount + 1);
                 sessionStorage.setItem(JSON.stringify({
                     username: this.username,
@@ -370,7 +365,7 @@
                 this.showLike[index] = false;
                 location.href = "userQuestion.html";
             },
-            subCommentLike(index) {
+            subCommentLike(index) {//取消评论点赞
                 this.changeCommentLike(this.commentDtoList[index].id, this.commentDtoList[index].likeCount - 1);
                 sessionStorage.setItem(JSON.stringify({
                     username: this.username,
@@ -379,7 +374,7 @@
                 this.showLike[index] = true;
                 location.href = "userQuestion.html";
             },
-            initializeCommentLikeStates() {
+            initializeCommentLikeStates() {//初始化评论点赞状态
                 this.showCommentLike = this.commentDtoList.map((comment) => {
                     const likeState = sessionStorage.getItem(JSON.stringify({
                         username: this.username,
@@ -388,7 +383,7 @@
                     return likeState !== '1';
                 });
             },
-            async deleteComment(id) {
+            async deleteComment(id) {//根据评论id删除评论
                 try {
                     const resp = await axios.delete('/user/deletecomment', {
                         params: {
@@ -407,14 +402,13 @@
                     console.error('删除失败', error);
                 }
             },
-            toUserInfo(){
+            toUserInfo() {//跳转到用户个人信息页面
                 localStorage.setItem("from", '0');
-                window.location.href="userInfo.html";
+                window.location.href = "userInfo.html";
             },
-            async getHotQuestionList(){
+            async getHotQuestionList() {//获取当前热门话题列表
                 try {
-                    const resp = await axios.get('/user/hotquestionlist', {
-                    });
+                    const resp = await axios.get('/user/hotquestionlist', {});
                     if (resp.data.code == 1) {
                         this.hotQuestionList = resp.data.data;
                     } else {
@@ -424,9 +418,9 @@
                     console.error('获取失败', error);
                 }
             },
-            async toQuestion(id){
-                let viewChangeInfo={
-                    id:id
+            async toQuestion(id) {//跳转到id对应问题的详情页面
+                let viewChangeInfo = {
+                    id: id
                 }
                 try {
                     const resp = await axios.put('/user/view', JSON.stringify(viewChangeInfo), {
@@ -434,18 +428,13 @@
                             'Content-Type': 'application/json'
                         }
                     });
-                    if (resp.data.code == 1) {
-
-                    } else {
-
-                    }
                 } catch (error) {
                     console.error('修改失败', error);
                 }
-                sessionStorage.setItem("qid",id);
-                window.location.href="userQuestion.html";
+                sessionStorage.setItem("qid", id);
+                window.location.href = "userQuestion.html";
             },
-            async imgToUserInfo(user) {
+            async imgToUserInfo(user) {//跳转到头像对应用户的个人信息页面
                 try {
                     const resp = await axios.put('/user/setuserinfo', JSON.stringify(user), {
                         headers: {
@@ -462,17 +451,17 @@
                     console.error('跳转失败', error);
                 }
             },
-            toUserChange(){
+            toUserChange() {//跳转到修改密码页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userChange.html";
+                window.location.href = "userChange.html";
             },
-            toFriend(){
+            toFriend() {//跳转到我的好友页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userFriend.html";
+                window.location.href = "userFriend.html";
             },
-            toChat(){
+            toChat() {//跳转到聊天页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userChat.html";
+                window.location.href = "userChat.html";
             }
         }
     });

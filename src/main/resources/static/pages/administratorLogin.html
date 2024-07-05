@@ -27,7 +27,7 @@
                 <h3 class="form-title">登录</h3>
                 <div class="col-sm-9 col-md-9">
                     <div class="form-group">
-                        <!--        用户名图标和用户名输入框            -->
+                        <!--        用户名输入框            -->
                         <i class="fa fa-user" aria-hidden="true"></i>
                         <input class="form-control" type="text" name="username" id="username" v-model="username"
                                placeholder="请输入用户名"
@@ -66,7 +66,7 @@
             verificationCode: ''
         },
         methods: {
-            async login() {
+            async login() {//登录
                 this.hash1 = md5(this.username + this.password);
                 this.verificationCode = this.generateRandomCode();
                 this.hash2 = md5(this.hash1 + this.verificationCode);
@@ -92,10 +92,10 @@
                     console.error('登录失败', error);
                 }
             },
-            toLogin() {
+            toLogin() {//跳转到用户登录界面
                 window.location.href = "userLogin.html";
             },
-            generateRandomCode() {
+            generateRandomCode() {//产生8位随机数字串作为登录验证时的验证码
                 let code = '';
                 for (let i = 0; i < 8; i++) {
                     code += Math.floor(Math.random() * 10);

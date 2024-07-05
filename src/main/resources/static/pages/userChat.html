@@ -13,8 +13,10 @@
             integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
             crossorigin="anonymous"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="/css/userChat.css">
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
 </head>
 <body>
 <div id="app">
@@ -27,7 +29,6 @@
                 </button>
                 <a class="navbar-brand" href="#" @click="toIndex">HitO</a>
             </div>
-
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav navbar-right">
                     <li th:if="${session.user!=null}">
@@ -59,23 +60,24 @@
                     <el-submenu index="1">
                         <template slot="title">好友列表</template>
                         <el-menu-item v-for="friend in friends" :key="friend.id" :index="'1-' + friend.friendId"
-                                      @click="selectFriend(friend)" :class="{ 'el-menu-item is-active': currentFriend!==null&&currentFriend.friendId === friend.friendId }">
+                                      @click="selectFriend(friend)"
+                                      :class="{ 'el-menu-item is-active': currentFriend!==null&&currentFriend.friendId === friend.friendId }">
                             <span v-if="friend.status==='accepted'">{{ friend.username }}</span>
                             <span v-if="friend.initiator!==userId&&friend.status =='requested'">{{ friend.username }}</span>
                             <el-button type="text" @click="handleEnsure(friend.userId,friend.friendId)"
-                                       v-if="friend.initiator!==userId&&friend.status =='requested'" type="success" icon="el-icon-check" circle>同意添加
+                                       v-if="friend.initiator!==userId&&friend.status =='requested'" type="success"
+                                       icon="el-icon-check" circle>同意添加
                             </el-button>
                         </el-menu-item>
                     </el-submenu>
                 </el-menu>
             </el-aside>
-
             <!-- 主要聊天区域 -->
             <el-container>
                 <el-header>正在与 {{ currentFriend ? currentFriend.username : '选择一个好友' }} 聊天</el-header>
                 <el-main>
                     <!-- 消息列表 -->
-                    <el-card class="chat-panel"  id="msg">
+                    <el-card class="chat-panel" id="msg">
                         <div class="message-item" v-for="(msg, index) in messages" :key="index">
                             <el-row>
                                 <el-col :span="24">
@@ -83,23 +85,20 @@
                                 </el-col>
                             </el-row>
                             <div class="message-content" id="messageContent">
-
                                 <el-row>
-                                    <div  style="width: 50px;height: 50px;text-align: left">
-                                        <el-avatar  v-if="username== msg.fromBy"
-                                                    src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png">{{msg.fromBy}}}</el-avatar>
+                                    <div style="width: 50px;height: 50px;text-align: left">
+                                        <el-avatar v-if="username== msg.fromBy"
+                                                   src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png">
+                                            {{msg.fromBy}}}
+                                        </el-avatar>
 
                                         <el-avatar v-if="username!=  msg.fromBy"> {{ msg.fromBy }}</el-avatar>
-
                                     </div>
                                     <div style="margin-left: 50px">
                                         <span class="message-text">{{ msg.message }}</span>
                                     </div>
                                 </el-row>
-
-
                             </div>
-
                         </div>
                     </el-card>
                 </el-main>
@@ -128,7 +127,7 @@
             messages: [],
             inputMessage: '',
             webSocket: null,
-            userId:''
+            userId: ''
         },
         created: function () {
             this.getNameBySession();
@@ -139,9 +138,7 @@
                 }
             }).then(response => {
                 if (response.data.code == 1) {
-                    console.info(response.data.data);
-                    console.info(response.data.data.id);
-                    this.userId=response.data.data.id;
+                    this.userId = response.data.data.id;
                     this.username = response.data.data.name
                     this.initWebSocket();
                 }
@@ -151,7 +148,7 @@
             })
         },
         methods: {
-            async getNameBySession() {
+            async getNameBySession() {//根据session获取当前登录的用户的名字
                 try {
                     const resp = await axios.get('/user/get/name'
                     );
@@ -164,7 +161,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async logOut() {
+            async logOut() {//登出
                 try {
                     const resp = await axios.get('/userlogout');
                     if (resp.data.code == 1) {
@@ -176,46 +173,37 @@
                     console.error('获取失败', error);
                 }
             },
-            toIndex() {
+            toIndex() {//跳转到用户主页
                 localStorage.setItem("tag", '0');
                 window.location.href = "userIndex.html";
             },
-            toProfile() {
+            toProfile() {//跳转到我的问题页面
                 localStorage.setItem("tag", '0');
                 window.location.href = "userProfile.html";
             },
-            toUserInfo() {
+            toUserInfo() {//跳转到用户个人信息页面
                 localStorage.setItem("tag", '0');
                 localStorage.setItem("from", '0');
                 window.location.href = "userInfo.html";
             },
-            toPublish() {
+            toPublish() {//跳转到发布问题页面
                 localStorage.setItem("tag", '0');
                 window.location.href = "userPublish.html";
             },
-            toUserChange(){
+            toUserChange() {//跳转到修改密码页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userChange.html";
+                window.location.href = "userChange.html";
             },
-            toFriend(){
+            toFriend() {//跳转到我的好友页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userFriend.html";
+                window.location.href = "userFriend.html";
             },
-            toChat(){
+            toChat() {//跳转到聊天页面
                 localStorage.setItem("tag", '0');
-                window.location.href="userChat.html";
+                window.location.href = "userChat.html";
             },
-            scrollLoad(e) {
-                let that = this
-                // 拉取数
-
-                if(e.srcElement.offsetHeight + e.srcElement.scrollTop >=e.srcElement.scrollHeight && that.List.length / num === that.currentPage){
-                    that.$set(that,'currentPage',that.currentPage +1)
-                    that.getList();
-                }},
-            selectFriend(friend) {
+            selectFriend(friend) {//选则一个好友进行聊天
                 this.currentFriend = friend;
-
                 this.messages = []; // 清空消息列表，开始新的聊天
                 const resp = axios.get('/chatRecords/list', {
                     params: {
@@ -237,10 +225,9 @@
                 })
                 // 或者滚动到页面底部
                 var div = document.getElementById('msg');
-
                 div.scrollTop = div.scrollHeight;
             },
-            sendMessage() {
+            sendMessage() {//发送消息
                 if (!this.currentFriend) {
                     this.$message({
                         type: 'error',
@@ -248,7 +235,6 @@
                     });
                     return;
                 }
-
                 if (this.inputMessage.trim() && this.currentFriend) {
                     this.messages.push({
                         fromBy: this.username,
@@ -272,9 +258,8 @@
                     }
                     this.inputMessage = '';
                 }
-
             },
-            format(date, formatString) {
+            format(date, formatString) {//格式化日期时间
                 const pad = (n) => (n < 10 ? '0' + n : n);
                 const year = date.getFullYear();
                 const month = pad(date.getMonth() + 1); // getMonth() 返回的月份是从0开始的
@@ -282,7 +267,6 @@
                 const hours = pad(date.getHours());
                 const minutes = pad(date.getMinutes());
                 const seconds = pad(date.getSeconds());
-
                 return formatString
                     .replace('yyyy', year)
                     .replace('MM', month)
@@ -291,8 +275,7 @@
                     .replace('mm', minutes)
                     .replace('ss', seconds);
             },
-
-            handleEnsure(userId, friendId) {
+            handleEnsure(userId, friendId) {//确认好友添加请求
                 const resp = axios.get('/friends/ensure', {
                     params: {
                         userId: userId, friendId: friendId,
@@ -312,11 +295,9 @@
                             message: '失败!'
                         });
                     }
-
                 })
-
             },
-            async getFriends() {
+            async getFriends() {//获取好友列表
                 const resp = await axios.get('/friends/list', {
                     params: {}
                 }).then(response => {
@@ -328,12 +309,8 @@
                     }
                 })
             },
-
-            initWebSocket() {
-
-
+            initWebSocket() {//初始化WebSocket
                 if (window.WebSocket) {
-
                     this.webSocket = new WebSocket("ws://101.201.107.15:8083/imserver/" + this.username);
                     this.webSocket.onopen = () => {
                         console.log('WebSocket 连接成功');
@@ -351,9 +328,7 @@
                     console.error('浏览器不支持 WebSocket');
                 }
             },
-            handleMessages(msg) {
-                // 处理从服务器接收到的消息
-                console.log("收到数据====" + msg)
+            handleMessages(msg) {// 处理从服务器接收到的消息
                 let msgJson = JSON.parse(msg);
                 if (msgJson.from == this.currentFriend.username) {
                     this.messages.push({
@@ -363,8 +338,7 @@
                     });
                     // 或者滚动到页面底部
                     var div = document.getElementById('msg');
-
-                    div.scrollTop = div.scrollHeight+80;
+                    div.scrollTop = div.scrollHeight + 80;
                 }
             }
         },
@@ -380,64 +354,5 @@
         }
     });
 </script>
-<!-- 聊天室样式 -->
-<style>
-    .chat-panel {
-        background-color: #f9f9f9; /* 聊天框背景色 */
-        max-height: 400px;
-        height: 400px;
-        overflow-y: auto;
-        padding: 8px;
-        border: 1px solid #eee;
-        margin-bottom: 10px;
-    }
-
-    .message-item {
-        margin-bottom: 8px;
-        padding: 8px;
-        background-color: white; /* 消息内容背景色 */
-        border-radius: 4px; /* 圆角边框 */
-    }
-
-    .message-content {
-        display: flex;
-        align-items: flex-start;
-    }
-
-    .message-time {
-        color: #999; /* 时间字段颜色 */
-        margin-right: 10px; /* 时间字段与消息内容的间隔 */
-        font-size: 0.85em; /* 时间字段字体大小 */
-    }
-
-    .message-text {
-        margin-left: 8px;
-        word-wrap: break-word; /* 允许在单词边界处换行 */
-        white-space: pre-wrap; /* 保留空白和换行符，同时允许自动换行 */
-    }
-
-    .el-header {
-        padding: 0;
-        background-color: #b3c0d1;
-        line-height: 3;
-        text-align: center;
-    }
-
-    /* 消息发送者是自己的样式 */
-    .my-message {
-        margin-left: auto; /* 靠右对齐 */
-        background-color: #e1f5fe; /* 例如：蓝色背景 */
-    }
-
-    /* 消息发送者是别人的样式 */
-    .other-message {
-        background-color: #ffffff; /* 例如：白色背景 */
-    }
-
-    .el-footer {
-        text-align: right;
-        padding: 8px;
-    }
-</style>
 </body>
 </html>

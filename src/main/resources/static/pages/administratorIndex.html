@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <title>用户管理</title>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8">
@@ -59,7 +59,8 @@
                         <el-main>
                             <form class="navbar-form navbar-left" @submit.prevent="searchUser">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="按用户名搜索用户" v-model="searchText">
+                                    <input type="text" class="form-control" placeholder="按用户名搜索用户"
+                                           v-model="searchText">
                                 </div>
                                 <button type="submit" class="btn btn-default">搜索</button>
                             </form>
@@ -112,7 +113,7 @@
             size: 10,
             total: 0,
             userList: [],
-            searchText:'',
+            searchText: '',
             showPageSelection: true
         },
         created: function () {
@@ -121,7 +122,7 @@
             this.getUserList(this.currentPageNumber, this.size);
         },
         methods: {
-            async getNameBySession() {
+            async getNameBySession() {//根据session获取当前登录的管理员的名字
                 try {
                     const resp = await axios.get('/administrator/get/name'
                     );
@@ -134,15 +135,15 @@
                     console.error('获取失败', error);
                 }
             },
-            handleSizeChange(newSize) {
+            handleSizeChange(newSize) {//分页模块页面大小变化重新请求数据
                 this.size = newSize;
                 this.getUserList(this.currentPageNumber, this.size);
             },
-            handleCurrentChange(newPage) {
+            handleCurrentChange(newPage) {//分页模块页号变化重新请求数据
                 this.currentPageNumber = newPage;
                 this.getUserList(this.currentPageNumber, this.size);
             },
-            async getUserNumber() {
+            async getUserNumber() {//获取当前已注册的用户数（显示在分页模块）
                 try {
                     const resp = await axios.get('/administrator/usernumber');
                     if (resp.data.code == 1) {
@@ -154,13 +155,13 @@
                     console.error('获取失败', error);
                 }
             },
-            toAdministratorIndex() {
+            toAdministratorIndex() {//跳转到用户管理页
                 window.location.href = "administratorIndex.html";
             },
-            toAdministratorQuestion() {
+            toAdministratorQuestion() {//跳转到问题管理页
                 window.location.href = "administratorQuestion.html";
             },
-            async getUserList(pageNumber, pageSize) {
+            async getUserList(pageNumber, pageSize) {//按页号和页大小请求用户列表
                 try {
                     const resp = await axios.get('/administrator/userlist', {
                         params: {
@@ -177,7 +178,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async logOut() {
+            async logOut() {//登出
                 try {
                     const resp = await axios.get('/administratorlogout');
                     if (resp.data.code == 1) {
@@ -189,16 +190,16 @@
                     console.error('获取失败', error);
                 }
             },
-            async deleteUser(id) {
+            async deleteUser(id) {//根据id删除用户
                 try {
-                    const resp = await axios.delete('/administrator/deleteuser',{
+                    const resp = await axios.delete('/administrator/deleteuser', {
                         params: {
-                            id:id
+                            id: id
                         }
                     });
                     if (resp.data.code == 1) {
                         alert("删除成功");
-                        window.location.href="administratorIndex.html";
+                        window.location.href = "administratorIndex.html";
                     } else {
                         console.log(resp.data.msg);
                     }
@@ -206,16 +207,16 @@
                     console.error('删除失败', error);
                 }
             },
-            searchUser(){
+            searchUser() {//根据用户名搜索用户
                 this.showPageSelection = false;
                 this.getUserNumberByUsername(this.searchText);
-                this.getUserListByUsername(this.currentPageNumber, this.size,this.searchText);
+                this.getUserListByUsername(this.currentPageNumber, this.size, this.searchText);
             },
-            async getUserNumberByUsername(username) {
+            async getUserNumberByUsername(username) {//根据用户名匹配（数据库模糊查询）到的用户数量
                 try {
-                    const resp = await axios.get('/administrator/usernumberbyusername',{
-                        params:{
-                            username:username
+                    const resp = await axios.get('/administrator/usernumberbyusername', {
+                        params: {
+                            username: username
                         }
                     });
                     if (resp.data.code == 1) {
@@ -227,13 +228,13 @@
                     console.error('获取失败', error);
                 }
             },
-            async getUserListByUsername(pageNumber, pageSize,username) {
+            async getUserListByUsername(pageNumber, pageSize, username) {//根据用户名匹配（数据库模糊查询）到的用户列表
                 try {
                     const resp = await axios.get('/administrator/userlistbyusername', {
                         params: {
                             pageNumber: pageNumber,
                             pageSize: pageSize,
-                            username:username
+                            username: username
                         }
                     });
                     if (resp.data.code == 1) {
@@ -245,9 +246,6 @@
                     console.error('获取失败', error);
                 }
             }
-
-
-
         }
     });
 </script>

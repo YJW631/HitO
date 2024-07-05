@@ -33,7 +33,6 @@
                         <input class="form-control required" type="password" name="password" id="oldPassword"
                                placeholder="请输入原密码" required v-model="oldPassword">
                     </div>
-
                     <!--           新密码                -->
                     <div class="form-group">
                         <i class="fa fa-key" aria-hidden="true"></i>
@@ -65,9 +64,9 @@
         el: '#app',
         data: {
             username: '',
-            oldPassword:'',
-            newPassword:'',
-            resetpw:'',
+            oldPassword: '',
+            newPassword: '',
+            resetpw: '',
             hash1: '',
             hash2: '',
             verificationCode: ''
@@ -77,10 +76,10 @@
             console.log(this.username);
         },
         methods: {
-            toLogin() {
+            toLogin() {//跳转到用户登录界面
                 window.location.href = "userLogin.html";
             },
-            async change() {
+            async change() {//修改密码
                 this.hash1 = md5(this.username + this.oldPassword);
                 this.verificationCode = this.generateRandomCode();
                 this.hash2 = md5(this.hash1 + this.verificationCode);
@@ -96,23 +95,23 @@
                         }
                     });
                     if (resp.data.code == 1) {
-                        if(this.oldPassword===this.newPassword){
+                        if (this.oldPassword === this.newPassword) {
                             alert("新密码不能与原密码一致");
-                            this.newPassword='';
-                            this.resetpw="";
+                            this.newPassword = '';
+                            this.resetpw = "";
                             return;
                         }
-                        if (this.newPassword!=this.resetpw){
+                        if (this.newPassword != this.resetpw) {
                             alert("两次输入的密码不一致");
-                            this.newPassword='';
-                            this.resetpw="";
+                            this.newPassword = '';
+                            this.resetpw = "";
                             return;
                         }
-                        this.newHash1=md5(this.username + this.newPassword);
+                        this.newHash1 = md5(this.username + this.newPassword);
                         try {
-                            let changeInfo={
-                                username:this.username,
-                                newHash1:this.newHash1
+                            let changeInfo = {
+                                username: this.username,
+                                newHash1: this.newHash1
                             }
                             const resp = await axios.put('/user/change', JSON.stringify(changeInfo), {
                                 headers: {
@@ -133,26 +132,26 @@
                         }
                     } else {
                         alert("原用户名或密码错误");
-                        this.username='';
-                        this.oldPassword='';
-                        this.newPassword='';
-                        this.resetpw='';
+                        this.username = '';
+                        this.oldPassword = '';
+                        this.newPassword = '';
+                        this.resetpw = '';
                     }
                 } catch (error) {
                     console.error('修改失败', error);
                 }
             },
-            generateRandomCode() {
+            generateRandomCode() {//产生8位随机数字串作为登录验证时的验证码
                 let code = '';
                 for (let i = 0; i < 8; i++) {
                     code += Math.floor(Math.random() * 10);
                 }
                 return code;
             },
-            toIndex(){
-                window.location.href="userIndex.html";
+            toIndex() {//跳转到用户首页
+                window.location.href = "userIndex.html";
             },
-            async getUsernameBySession() {
+            async getUsernameBySession() {//根据session获取当前登陆的用户的用户名
                 try {
                     const resp = await axios.get('/user/get/username'
                     );
@@ -165,7 +164,7 @@
                     console.error('获取失败', error);
                 }
             },
-            async logOut() {
+            async logOut() {//登出
                 try {
                     const resp = await axios.get('/userlogout');
                     if (resp.data.code == 1) {
